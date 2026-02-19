@@ -1,3 +1,4 @@
+
 import "react-native-reanimated";
 import React, { useEffect } from "react";
 import { useFonts } from "expo-font";
@@ -88,6 +89,45 @@ export default function RootLayout() {
             <Stack>
               {/* Main app with tabs */}
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              
+              {/* Client detail screen */}
+              <Stack.Screen 
+                name="client/[id]" 
+                options={{ 
+                  headerShown: true,
+                  title: 'Client Details',
+                  presentation: 'card'
+                }} 
+              />
+              
+              {/* Program detail screen */}
+              <Stack.Screen 
+                name="program/[id]" 
+                options={{ 
+                  headerShown: true,
+                  title: 'Program Details',
+                  presentation: 'card'
+                }} 
+              />
+              
+              {/* Create client screen */}
+              <Stack.Screen 
+                name="create-client" 
+                options={{ 
+                  headerShown: true,
+                  title: 'Create Client',
+                  presentation: 'modal'
+                }} 
+              />
+              
+              {/* 404 Not Found screen */}
+              <Stack.Screen 
+                name="+not-found" 
+                options={{ 
+                  headerShown: true,
+                  title: 'Not Found'
+                }} 
+              />
             </Stack>
             <SystemBars style={"auto"} />
             </GestureHandlerRootView>

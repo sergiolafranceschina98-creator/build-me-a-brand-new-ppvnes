@@ -36,14 +36,5 @@
         "BACKEND_URL": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
       }
     }
-  },
-  "submit": {
-    "production": {
-      "ios": {
-        "appleId": "your-apple-id@email.com",
-        "ascAppId": "your-app-store-connect-app-id",
-        "appleTeamId": "your-apple-team-id"
-      }
-    }
   }
 }

@@ -8,7 +8,6 @@
     "icon": "./assets/images/app-icon-jjc.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "owner": "your-expo-username",
     "splash": {
       "image": "./assets/images/app-icon-jjc.png",
       "resizeMode": "contain",
@@ -48,10 +47,7 @@
     },
     "extra": {
       "router": {},
-      "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev",
-      "eas": {
-        "projectId": "your-project-id"
-      }
+      "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
     }
   }
 }
