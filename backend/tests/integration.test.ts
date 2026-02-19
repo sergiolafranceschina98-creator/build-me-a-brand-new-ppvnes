@@ -1,5 +1,5 @@
 import { describe, test, expect } from "bun:test";
-import { api, authenticatedApi, signUpTestUser, expectStatus, connectWebSocket, connectAuthenticatedWebSocket, waitForMessage } from "./helpers";
+import { api, expectStatus } from "./helpers";
 
 describe("API Integration Tests", () => {
   // Shared state for chaining tests (e.g., created resource IDs, auth tokens)
@@ -162,6 +162,15 @@ describe("API Integration Tests", () => {
       await expectStatus(res, 404);
     });
 
+    test("Generate program with invalid client UUID format", async () => {
+      const res = await api(`/api/clients/invalid-uuid/generate-program`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      await expectStatus(res, 400);
+    });
+
     test("Get all programs for a client", async () => {
       const res = await api(`/api/clients/${clientId}/programs`, {
         method: "GET",
@@ -181,6 +190,13 @@ describe("API Integration Tests", () => {
         method: "GET",
       });
       await expectStatus(res, 404);
+    });
+
+    test("Get programs with invalid client UUID format", async () => {
+      const res = await api(`/api/clients/invalid-uuid/programs`, {
+        method: "GET",
+      });
+      await expectStatus(res, 400);
     });
 
     test("Get full program details by ID", async () => {
@@ -219,6 +235,13 @@ describe("API Integration Tests", () => {
       const data = await res.json();
       expect(data.success).toBe(true);
       expect(data.message).toBe("Client deleted successfully");
+    });
+
+    test("Verify program was cascade-deleted with client", async () => {
+      const res = await api(`/api/programs/${programId}`, {
+        method: "GET",
+      });
+      await expectStatus(res, 404);
     });
   });
 });

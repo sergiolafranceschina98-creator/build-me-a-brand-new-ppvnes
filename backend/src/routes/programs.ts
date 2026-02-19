@@ -43,7 +43,10 @@ export function register(app: App, fastify: FastifyInstance) {
               program_name: { type: 'string' },
               duration_weeks: { type: 'number' },
               split_type: { type: 'string' },
-              program_structure: { type: 'object' },
+              program_structure: {
+                type: 'object',
+                additionalProperties: true,
+              },
               created_at: { type: 'string', format: 'date-time' },
             },
           },
@@ -238,7 +241,10 @@ export function register(app: App, fastify: FastifyInstance) {
             program_name: { type: 'string' },
             duration_weeks: { type: 'number' },
             split_type: { type: 'string' },
-            program_structure: { type: 'object' },
+            program_structure: {
+              type: 'object',
+              additionalProperties: true,
+            },
             created_at: { type: 'string', format: 'date-time' },
           },
         },
