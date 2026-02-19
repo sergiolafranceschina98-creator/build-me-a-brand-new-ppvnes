@@ -109,7 +109,9 @@ export default function ClientDetailScreen() {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
   const [deletingClient, setDeletingClient] = useState(false);
+  const [deletingProgramId, setDeletingProgramId] = useState<string | null>(null);
   const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
+  const [confirmDeleteProgramModal, setConfirmDeleteProgramModal] = useState(false);
   const [errorModal, setErrorModal] = useState<{ visible: boolean; message: string }>({
     visible: false,
     message: '',
@@ -168,6 +170,38 @@ export default function ClientDetailScreen() {
   const handleProgramPress = (programId: string) => {
     console.log('User tapped program:', programId);
     router.push(`/program/${programId}`);
+  };
+
+  const handleDeleteProgram = (programId: string, programName: string) => {
+    console.log('User tapped Delete Program button for:', programId, programName);
+    setDeletingProgramId(programId);
+    setConfirmDeleteProgramModal(true);
+  };
+
+  const confirmDeleteProgram = async () => {
+    if (!deletingProgramId) return;
+    
+    const programToDelete = programs.find(p => p.id === deletingProgramId);
+    const programName = programToDelete?.program_name || 'Program';
+    
+    setConfirmDeleteProgramModal(false);
+    
+    try {
+      console.log('Deleting program:', deletingProgramId);
+      await apiDelete<{ success: boolean; message: string }>(`/api/programs/${deletingProgramId}`);
+      console.log('Program deleted successfully');
+      
+      // Remove from local state
+      setPrograms(prev => prev.filter(p => p.id !== deletingProgramId));
+      
+      const successMessage = `"${programName}" has been deleted successfully.`;
+      setSuccessModal({ visible: true, message: successMessage });
+    } catch (error: any) {
+      console.error('Error deleting program:', error);
+      setErrorModal({ visible: true, message: error?.message || 'Failed to delete program. Please try again.' });
+    } finally {
+      setDeletingProgramId(null);
+    }
   };
 
   const handleDeleteClient = () => {
@@ -302,7 +336,7 @@ export default function ClientDetailScreen() {
         </View>
       </Modal>
 
-      {/* Confirm Delete Modal */}
+      {/* Confirm Delete Client Modal */}
       <Modal
         visible={confirmDeleteModal}
         transparent
@@ -325,6 +359,40 @@ export default function ClientDetailScreen() {
               <TouchableOpacity
                 style={[styles.modalButtonHalf, { backgroundColor: theme.error }]}
                 onPress={confirmDeleteClient}
+              >
+                <Text style={styles.modalButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Confirm Delete Program Modal */}
+      <Modal
+        visible={confirmDeleteProgramModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmDeleteProgramModal(false)}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Delete Program</Text>
+            <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
+              Are you sure you want to delete this program? This action cannot be undone.
+            </Text>
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity
+                style={[styles.modalButtonHalf, { backgroundColor: theme.card, borderColor: theme.borderLight }]}
+                onPress={() => {
+                  setConfirmDeleteProgramModal(false);
+                  setDeletingProgramId(null);
+                }}
+              >
+                <Text style={[styles.modalButtonText, { color: theme.text }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButtonHalf, { backgroundColor: theme.error }]}
+                onPress={confirmDeleteProgram}
               >
                 <Text style={styles.modalButtonText}>Delete</Text>
               </TouchableOpacity>
@@ -503,13 +571,30 @@ export default function ClientDetailScreen() {
                         </View>
                       </View>
                     </View>
-                    <View style={[styles.chevronContainer, { backgroundColor: theme.highlight }]}>
-                      <IconSymbol
-                        ios_icon_name="chevron.right"
-                        android_material_icon_name="arrow-forward"
-                        size={18}
-                        color={theme.primary}
-                      />
+                    <View style={styles.programActions}>
+                      <TouchableOpacity
+                        onPress={(e) => {
+                          e.stopPropagation();
+                          handleDeleteProgram(program.id, program.program_name);
+                        }}
+                        style={[styles.deleteIconButton, { backgroundColor: theme.error }]}
+                        activeOpacity={0.7}
+                      >
+                        <IconSymbol
+                          ios_icon_name="trash"
+                          android_material_icon_name="delete"
+                          size={18}
+                          color="#FFFFFF"
+                        />
+                      </TouchableOpacity>
+                      <View style={[styles.chevronContainer, { backgroundColor: theme.highlight }]}>
+                        <IconSymbol
+                          ios_icon_name="chevron.right"
+                          android_material_icon_name="arrow-forward"
+                          size={18}
+                          color={theme.primary}
+                        />
+                      </View>
                     </View>
                   </View>
                 </TouchableOpacity>
@@ -754,6 +839,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 0.3,
+  },
+  programActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  deleteIconButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    justifyContent: 'center',
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 3,
   },
   chevronContainer: {
     width: 32,

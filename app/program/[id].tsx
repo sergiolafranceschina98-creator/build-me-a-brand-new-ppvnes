@@ -276,16 +276,17 @@ export default function ProgramDetailScreen() {
                   
                   {/* Render workout days */}
                   {Array.isArray(workoutDays) && workoutDays.map((day: any, dayIdx: number) => {
-                    const dayName = day.dayName || day.day || day.name || `Day ${dayIdx + 1}`;
+                    const dayNumber = dayIdx + 1;
+                    const dayLabel = `Day ${dayNumber}`;
                     const focus = day.focus || day.muscle_focus || day.type || '';
                     const exercises = day.exercises || day.workout || [];
                     
-                    console.log('[PROGRAM] Rendering day:', dayName, 'with', exercises.length, 'exercises');
+                    console.log('[PROGRAM] Rendering day:', dayLabel, 'with', exercises.length, 'exercises');
                     
                     return (
                       <View key={dayIdx} style={[styles.dayCard, { backgroundColor: theme.card }]}>
                         <View style={styles.dayHeader}>
-                          <Text style={[styles.dayTitle, { color: theme.text }]}>{dayName}</Text>
+                          <Text style={[styles.dayTitle, { color: theme.text }]}>{dayLabel}</Text>
                           {focus && <Text style={[styles.dayFocus, { color: theme.primary }]}>{focus}</Text>}
                         </View>
                         {renderExercises(exercises)}
@@ -314,13 +315,14 @@ export default function ProgramDetailScreen() {
     if (Array.isArray(directDays) && directDays.length > 0) {
       console.log('[PROGRAM] Rendering', directDays.length, 'direct days');
       return directDays.map((day: any, dayIdx: number) => {
-        const dayName = day.day || day.day_name || day.name || `Day ${dayIdx + 1}`;
+        const dayNumber = dayIdx + 1;
+        const dayLabel = `Day ${dayNumber}`;
         const focus = day.focus || day.muscle_focus || day.type || '';
         const exercises = day.exercises || day.workout || [];
         return (
           <View key={dayIdx} style={[styles.dayCard, { backgroundColor: theme.card }]}>
             <View style={styles.dayHeader}>
-              <Text style={[styles.dayTitle, { color: theme.text }]}>{dayName}</Text>
+              <Text style={[styles.dayTitle, { color: theme.text }]}>{dayLabel}</Text>
               {focus ? <Text style={[styles.dayFocus, { color: theme.primary }]}>{focus}</Text> : null}
             </View>
             {renderExercises(exercises)}
