@@ -3,15 +3,15 @@
   "expo": {
     "name": "AI Workout Builder",
     "slug": "ai-workout-builder",
+    "scheme": "aiworkoutbuilder",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-jjc.png",
     "userInterfaceStyle": "automatic",
-    "newArchEnabled": true,
     "splash": {
       "image": "./assets/images/final_quest_240x240.png",
       "resizeMode": "contain",
-      "backgroundColor": "#000000"
+      "backgroundColor": "#ffffff"
     },
     "assetBundlePatterns": [
       "**/*"
@@ -19,41 +19,38 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.aiworkoutbuilder.app",
-      "buildNumber": "1.0.0",
+      "buildNumber": "1.0.1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false,
-        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload images.",
-        "NSCameraUsageDescription": "This app needs access to your camera to take photos."
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/final_quest_240x240__.png",
-        "backgroundColor": "#000000"
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#ffffff"
       },
-      "edgeToEdgeEnabled": true,
-      "package": "com.aiworkoutbuilder.app",
-      "versionCode": 1
+      "package": "com.aiworkoutbuilder.app"
     },
     "web": {
-      "favicon": "./assets/images/final_quest_240x240.png",
       "bundler": "metro",
-      "output": "static"
+      "output": "static",
+      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
-      "expo-font",
-      "expo-router",
-      "expo-web-browser"
+      "expo-router"
     ],
-    "scheme": "aiworkoutbuilder",
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
-      "router": {
-        "origin": false
+      "backendUrl": "https://ai-workout-builder-backend.natively.live",
+      "resourceClasses": {
+        "ios": "m1-medium",
+        "android": "medium"
       },
-      "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
+      "eas": {
+        "projectId": "c59b1ee6-b1ce-467a-abc7-377810d1fa6c"
+      }
     }
   }
 }
