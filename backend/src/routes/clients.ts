@@ -255,4 +255,33 @@ export function register(app: App, fastify: FastifyInstance) {
       created_at: client.createdAt,
     };
   });
+
+  // Delete all clients
+  fastify.delete('/api/clients/all', {
+    schema: {
+      description: 'Delete all clients from the database',
+      tags: ['clients'],
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            deletedCount: { type: 'number' },
+          },
+        },
+      },
+    },
+  }, async (request, reply) => {
+    app.logger.info('Deleting all clients');
+
+    const deletedClients = await app.db
+      .delete(schema.clients)
+      .returning();
+
+    app.logger.info({ deletedCount: deletedClients.length }, 'All clients deleted successfully');
+    return reply.status(200).send({
+      success: true,
+      deletedCount: deletedClients.length,
+    });
+  });
 }

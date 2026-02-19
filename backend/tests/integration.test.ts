@@ -196,5 +196,16 @@ describe("API Integration Tests", () => {
       });
       await expectStatus(res, 400);
     });
+
+    test("Delete all clients", async () => {
+      const res = await api("/api/clients/all", {
+        method: "DELETE",
+      });
+      await expectStatus(res, 200);
+      const data = await res.json();
+      expect(data.success).toBe(true);
+      expect(data.deletedCount).toBeDefined();
+      expect(typeof data.deletedCount).toBe("number");
+    });
   });
 });
