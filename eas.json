@@ -1,16 +1,49 @@
+
 {
+  "cli": {
+    "version": ">= 13.2.0",
+    "appVersionSource": "remote"
+  },
   "build": {
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "autoIncrement": true
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "env": {
+        "BACKEND_URL": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
+      }
     },
     "preview": {
       "distribution": "internal",
-      "autoIncrement": true
+      "ios": {
+        "resourceClass": "m-medium"
+      },
+      "env": {
+        "BACKEND_URL": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
+      }
     },
     "production": {
-      "autoIncrement": true
+      "ios": {
+        "resourceClass": "m-medium",
+        "simulator": false
+      },
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "BACKEND_URL": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
+      }
+    }
+  },
+  "submit": {
+    "production": {
+      "ios": {
+        "appleId": "your-apple-id@email.com",
+        "ascAppId": "your-app-store-connect-app-id",
+        "appleTeamId": "your-apple-team-id"
+      }
     }
   }
 }

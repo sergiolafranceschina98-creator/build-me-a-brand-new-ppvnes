@@ -1,12 +1,14 @@
+
 {
   "expo": {
-    "name": "Natively App",
-    "slug": "Natively App",
+    "name": "AI Workout Builder",
+    "slug": "ai-workout-builder",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-jjc.png",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
+    "owner": "your-expo-username",
     "splash": {
       "image": "./assets/images/app-icon-jjc.png",
       "resizeMode": "contain",
@@ -14,9 +16,12 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.Natively",
+      "bundleIdentifier": "com.aiworkoutbuilder.app",
+      "buildNumber": "1",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "NSPhotoLibraryUsageDescription": "This app needs access to your photo library to upload images.",
+        "NSCameraUsageDescription": "This app needs access to your camera to take photos."
       }
     },
     "android": {
@@ -25,7 +30,8 @@
         "backgroundColor": "#000000"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.Natively"
+      "package": "com.aiworkoutbuilder.app",
+      "versionCode": 1
     },
     "web": {
       "favicon": "./assets/images/final_quest_240x240.png",
@@ -36,13 +42,16 @@
       "expo-router",
       "expo-web-browser"
     ],
-    "scheme": "Natively App",
+    "scheme": "aiworkoutbuilder",
     "experiments": {
       "typedRoutes": true
     },
     "extra": {
       "router": {},
-      "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
+      "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev",
+      "eas": {
+        "projectId": "your-project-id"
+      }
     }
   }
 }
