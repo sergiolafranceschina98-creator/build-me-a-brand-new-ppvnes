@@ -56,6 +56,22 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
   return data as T;
 }
 
+async function apiDelete<T>(path: string): Promise<T> {
+  const url = `${BACKEND_URL}${path}`;
+  console.log(`[API] DELETE ${url}`);
+  const response = await fetch(url, {
+    method: 'DELETE',
+  });
+  if (!response.ok) {
+    let msg = `HTTP ${response.status}`;
+    try { const d = await response.json(); msg = d?.error || d?.message || msg; } catch {}
+    throw new Error(msg);
+  }
+  const data = await response.json();
+  console.log(`[API] DELETE ${url} response:`, data);
+  return data as T;
+}
+
 interface ClientDetails {
   id: string;
   name: string;
@@ -92,6 +108,8 @@ export default function ClientDetailScreen() {
   const [programs, setPrograms] = useState<WorkoutProgram[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [deletingClient, setDeletingClient] = useState(false);
+  const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
   const [errorModal, setErrorModal] = useState<{ visible: boolean; message: string }>({
     visible: false,
     message: '',
@@ -150,6 +168,30 @@ export default function ClientDetailScreen() {
   const handleProgramPress = (programId: string) => {
     console.log('User tapped program:', programId);
     router.push(`/program/${programId}`);
+  };
+
+  const handleDeleteClient = () => {
+    console.log('User tapped Delete Client button');
+    setConfirmDeleteModal(true);
+  };
+
+  const confirmDeleteClient = async () => {
+    setConfirmDeleteModal(false);
+    try {
+      setDeletingClient(true);
+      console.log('Deleting client:', clientId);
+      await apiDelete<{ success: boolean; message: string }>(`/api/clients/${clientId}`);
+      console.log('Client deleted successfully');
+      setSuccessModal({ visible: true, message: 'Client has been successfully deleted.' });
+      setTimeout(() => {
+        router.back();
+      }, 1500);
+    } catch (error: any) {
+      console.error('Error deleting client:', error);
+      setErrorModal({ visible: true, message: error?.message || 'Failed to delete client. Please try again.' });
+    } finally {
+      setDeletingClient(false);
+    }
   };
 
   if (loading) {
@@ -246,7 +288,7 @@ export default function ClientDetailScreen() {
       >
         <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
           <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>🎉 Program Generated!</Text>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Success</Text>
             <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
               {successModal.message}
             </Text>
@@ -254,8 +296,39 @@ export default function ClientDetailScreen() {
               style={[styles.modalButton, { backgroundColor: theme.primary }]}
               onPress={() => setSuccessModal({ visible: false, message: '' })}
             >
-              <Text style={styles.modalButtonText}>View Programs</Text>
+              <Text style={styles.modalButtonText}>OK</Text>
             </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Confirm Delete Modal */}
+      <Modal
+        visible={confirmDeleteModal}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setConfirmDeleteModal(false)}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Delete Client</Text>
+            <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
+              Are you sure you want to delete this client? This will also delete all associated workout programs. This action cannot be undone.
+            </Text>
+            <View style={styles.modalButtonRow}>
+              <TouchableOpacity
+                style={[styles.modalButtonHalf, { backgroundColor: theme.card, borderColor: theme.borderLight }]}
+                onPress={() => setConfirmDeleteModal(false)}
+              >
+                <Text style={[styles.modalButtonText, { color: theme.text }]}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.modalButtonHalf, { backgroundColor: theme.error }]}
+                onPress={confirmDeleteClient}
+              >
+                <Text style={styles.modalButtonText}>Delete</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </Modal>
@@ -444,6 +517,28 @@ export default function ClientDetailScreen() {
             })
           )}
         </View>
+
+        <TouchableOpacity
+          onPress={handleDeleteClient}
+          disabled={deletingClient}
+          style={[styles.deleteButton, { backgroundColor: theme.error, opacity: deletingClient ? 0.6 : 1 }]}
+          activeOpacity={0.8}
+        >
+          {deletingClient ? (
+            <ActivityIndicator color="#FFFFFF" size="small" />
+          ) : (
+            <React.Fragment>
+              <IconSymbol
+                ios_icon_name="trash"
+                android_material_icon_name="delete"
+                size={20}
+                color="#FFFFFF"
+                style={styles.buttonIcon}
+              />
+              <Text style={styles.deleteButtonText}>Delete Client</Text>
+            </React.Fragment>
+          )}
+        </TouchableOpacity>
       </ScrollView>
     </View>
   );
@@ -667,6 +762,26 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  deleteButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 16,
+    padding: 18,
+    marginTop: 24,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 6,
+  },
+  deleteButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
   modalOverlay: {
     flex: 1,
     justifyContent: 'center',
@@ -699,6 +814,17 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
+  },
+  modalButtonRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+  modalButtonHalf: {
+    flex: 1,
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+    borderWidth: 1,
   },
   modalButtonText: {
     color: '#FFFFFF',

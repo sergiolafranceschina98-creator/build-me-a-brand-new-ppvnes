@@ -38,23 +38,6 @@ async function apiGet<T>(path: string): Promise<T> {
   return data as T;
 }
 
-async function apiDelete<T>(path: string): Promise<T> {
-  const url = `${BACKEND_URL}${path}`;
-  console.log(`[API] DELETE ${url}`);
-  const response = await fetch(url, {
-    method: 'DELETE',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!response.ok) {
-    let msg = `HTTP ${response.status}`;
-    try { const d = await response.json(); msg = d?.error || d?.message || msg; } catch {}
-    throw new Error(msg);
-  }
-  const data = await response.json();
-  console.log(`[API] DELETE ${url} response:`, data);
-  return data as T;
-}
-
 interface Client {
   id: string;
   name: string;
@@ -70,12 +53,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [deletingAll, setDeletingAll] = useState(false);
   const [errorModal, setErrorModal] = useState<{ visible: boolean; message: string }>({
     visible: false,
     message: '',
   });
-  const [confirmDeleteModal, setConfirmDeleteModal] = useState(false);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -106,27 +87,6 @@ export default function HomeScreen() {
   const handleClientPress = (clientId: string) => {
     console.log('User tapped client:', clientId);
     router.push(`/client/${clientId}`);
-  };
-
-  const handleDeleteAllClients = () => {
-    console.log('User tapped Delete All Clients button');
-    setConfirmDeleteModal(true);
-  };
-
-  const confirmDeleteAllClients = async () => {
-    setConfirmDeleteModal(false);
-    try {
-      setDeletingAll(true);
-      console.log('Deleting all clients via DELETE /api/clients/all');
-      const result = await apiDelete<{ success: boolean; deletedCount: number }>('/api/clients/all');
-      console.log('Delete all clients result:', result);
-      setClients([]);
-    } catch (error: any) {
-      console.error('Error deleting all clients:', error);
-      setErrorModal({ visible: true, message: error?.message || 'Failed to delete clients. Please try again.' });
-    } finally {
-      setDeletingAll(false);
-    }
   };
 
   const emptyStateView = (
@@ -222,26 +182,6 @@ export default function HomeScreen() {
           headerShadowVisible: false,
           headerBackVisible: false,
           headerLeft: () => null,
-          headerRight: () =>
-            clients.length > 0 ? (
-              <TouchableOpacity
-                onPress={handleDeleteAllClients}
-                disabled={deletingAll}
-                style={[styles.headerButton, { backgroundColor: theme.highlight }]}
-                activeOpacity={0.7}
-              >
-                {deletingAll ? (
-                  <ActivityIndicator size="small" color={theme.error} />
-                ) : (
-                  <IconSymbol
-                    ios_icon_name="trash"
-                    android_material_icon_name="delete"
-                    size={20}
-                    color={theme.error}
-                  />
-                )}
-              </TouchableOpacity>
-            ) : null,
         }}
       />
 
@@ -264,37 +204,6 @@ export default function HomeScreen() {
             >
               <Text style={styles.modalButtonText}>OK</Text>
             </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Confirm Delete All Modal */}
-      <Modal
-        visible={confirmDeleteModal}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setConfirmDeleteModal(false)}
-      >
-        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
-          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Delete All Clients</Text>
-            <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
-              Are you sure you want to delete all clients? This action cannot be undone.
-            </Text>
-            <View style={styles.modalButtonRow}>
-              <TouchableOpacity
-                style={[styles.modalButtonHalf, { backgroundColor: theme.card, borderColor: theme.borderLight }]}
-                onPress={() => setConfirmDeleteModal(false)}
-              >
-                <Text style={[styles.modalButtonText, { color: theme.text }]}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButtonHalf, { backgroundColor: theme.error }]}
-                onPress={confirmDeleteAllClients}
-              >
-                <Text style={styles.modalButtonText}>Delete All</Text>
-              </TouchableOpacity>
-            </View>
           </View>
         </View>
       </Modal>
@@ -359,11 +268,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 16,
     lineHeight: 24,
-  },
-  headerButton: {
-    marginRight: 12,
-    padding: 10,
-    borderRadius: 12,
   },
   loadingContainer: {
     flex: 1,
@@ -518,17 +422,6 @@ const styles = StyleSheet.create({
     borderRadius: 14,
     paddingVertical: 16,
     alignItems: 'center',
-  },
-  modalButtonRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  modalButtonHalf: {
-    flex: 1,
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-    borderWidth: 1,
   },
   modalButtonText: {
     color: '#FFFFFF',
