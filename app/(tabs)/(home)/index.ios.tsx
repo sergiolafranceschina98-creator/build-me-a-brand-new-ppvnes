@@ -13,7 +13,6 @@ import {
 import { Stack, useRouter, useFocusEffect } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
 import { colors } from '@/styles/commonStyles';
-import { HeaderRightButton, HeaderLeftButton } from '@/components/HeaderButtons';
 import Constants from 'expo-constants';
 
 const BACKEND_URL =
@@ -171,8 +170,6 @@ export default function HomeScreen() {
           headerStyle: { backgroundColor: theme.card },
           headerTintColor: theme.text,
           headerShadowVisible: false,
-          headerLeft: () => <HeaderLeftButton />,
-          headerRight: () => <HeaderRightButton />,
           headerLargeTitle: true,
         }}
       />
@@ -201,6 +198,9 @@ export default function HomeScreen() {
       </Modal>
 
       <View style={styles.header}>
+        <Text style={[styles.title, { color: theme.text }]}>
+          Your Clients
+        </Text>
         <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
           Create personalized workout programs in under 60 seconds
         </Text>
@@ -240,8 +240,13 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 20,
-    paddingTop: 8,
+    paddingTop: 20,
     paddingBottom: 16,
+  },
+  title: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 8,
   },
   subtitle: {
     fontSize: 16,

@@ -14,7 +14,6 @@ import {
 import { Stack, useRouter, useFocusEffect } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
 import { colors } from '@/styles/commonStyles';
-import { HeaderRightButton, HeaderLeftButton } from '@/components/HeaderButtons';
 import Constants from 'expo-constants';
 
 const BACKEND_URL =
@@ -172,8 +171,6 @@ export default function HomeScreen() {
           headerStyle: { backgroundColor: theme.card },
           headerTintColor: theme.text,
           headerShadowVisible: false,
-          headerLeft: () => <HeaderLeftButton />,
-          headerRight: () => <HeaderRightButton />,
         }}
       />
 
