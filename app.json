@@ -45,13 +45,9 @@
     "experiments": {
       "typedRoutes": true
     },
-    "owner": "your-expo-username",
     "extra": {
       "router": {},
-      "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev",
-      "eas": {
-        "projectId": "your-eas-project-id"
-      }
+      "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
     }
   }
 }
