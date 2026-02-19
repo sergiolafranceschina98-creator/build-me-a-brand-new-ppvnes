@@ -1,3 +1,4 @@
+
 {
   "expo": {
     "name": "AI Workout Builder",
@@ -46,7 +47,10 @@
     },
     "extra": {
       "router": {},
-      "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
+      "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev",
+      "eas": {
+        "projectId": "auto-generated-by-eas"
+      }
     }
   }
 }
