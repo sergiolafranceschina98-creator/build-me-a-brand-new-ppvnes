@@ -66,11 +66,12 @@ export default function ProgramDetailScreen() {
   const loadProgramData = async () => {
     try {
       setLoading(true);
-      console.log('Fetching program details for:', programId);
+      console.log('[API] Fetching program details for:', programId);
       const data = await apiGet<ProgramDetails>(`/api/programs/${programId}`);
+      console.log('[API] Program structure received:', JSON.stringify(data.program_structure)?.slice(0, 200));
       setProgram(data);
     } catch (error: any) {
-      console.error('Error loading program data:', error);
+      console.error('[API] Error loading program data:', error);
       setErrorModal({ visible: true, message: error?.message || 'Failed to load program. Please try again.' });
     } finally {
       setLoading(false);
@@ -125,28 +126,61 @@ export default function ProgramDetailScreen() {
   // Helper to render exercises in a day
   const renderExercises = (exercises: any[]) => {
     if (!exercises || exercises.length === 0) return null;
-    return exercises.map((ex: any, idx: number) => (
-      <View key={idx} style={[styles.exerciseRow, { borderBottomColor: theme.border }]}>
-        <View style={styles.exerciseHeader}>
-          <Text style={[styles.exerciseName, { color: theme.text }]}>
-            {idx + 1}. {ex.name || ex.exercise_name || ex.exercise || 'Exercise'}
-          </Text>
-          {ex.muscle_group && (
-            <View style={[styles.muscleBadge, { backgroundColor: theme.highlight }]}>
-              <Text style={[styles.muscleBadgeText, { color: theme.primary }]}>{ex.muscle_group}</Text>
-            </View>
-          )}
+    return exercises.map((ex: any, idx: number) => {
+      const exerciseName = ex.exerciseName || ex.name || ex.exercise_name || ex.exercise || 'Exercise';
+      const sets = ex.sets || '';
+      const reps = ex.reps || '';
+      const rest = ex.restSeconds ? `${ex.restSeconds}s` : (ex.rest || '');
+      const tempo = ex.tempo || '';
+      const rpe = ex.rpeOrIntensity || ex.rpe || ex.intensity || '';
+      const muscleGroup = ex.muscle_group || ex.muscleGroup || '';
+      const notes = ex.notes || '';
+      
+      return (
+        <View key={idx} style={[styles.exerciseRow, { borderBottomColor: theme.border }]}>
+          <View style={styles.exerciseHeader}>
+            <Text style={[styles.exerciseName, { color: theme.text }]}>
+              {idx + 1}. {exerciseName}
+            </Text>
+            {muscleGroup && (
+              <View style={[styles.muscleBadge, { backgroundColor: theme.highlight }]}>
+                <Text style={[styles.muscleBadgeText, { color: theme.primary }]}>{muscleGroup}</Text>
+              </View>
+            )}
+          </View>
+          <View style={styles.exerciseDetails}>
+            {sets && (
+              <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>
+                Sets: <Text style={{ color: theme.text, fontWeight: '600' }}>{sets}</Text>
+              </Text>
+            )}
+            {reps && (
+              <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>
+                Reps: <Text style={{ color: theme.text, fontWeight: '600' }}>{reps}</Text>
+              </Text>
+            )}
+            {rest && (
+              <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>
+                Rest: <Text style={{ color: theme.text, fontWeight: '600' }}>{rest}</Text>
+              </Text>
+            )}
+            {tempo && (
+              <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>
+                Tempo: <Text style={{ color: theme.text, fontWeight: '600' }}>{tempo}</Text>
+              </Text>
+            )}
+            {rpe && (
+              <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>
+                RPE: <Text style={{ color: theme.text, fontWeight: '600' }}>{rpe}</Text>
+              </Text>
+            )}
+            {notes && (
+              <Text style={[styles.exerciseNotes, { color: theme.textSecondary }]}>{notes}</Text>
+            )}
+          </View>
         </View>
-        <View style={styles.exerciseDetails}>
-          {ex.sets && <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>Sets: <Text style={{ color: theme.text, fontWeight: '600' }}>{ex.sets}</Text></Text>}
-          {ex.reps && <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>Reps: <Text style={{ color: theme.text, fontWeight: '600' }}>{ex.reps}</Text></Text>}
-          {ex.rest && <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>Rest: <Text style={{ color: theme.text, fontWeight: '600' }}>{ex.rest}</Text></Text>}
-          {ex.tempo && <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>Tempo: <Text style={{ color: theme.text, fontWeight: '600' }}>{ex.tempo}</Text></Text>}
-          {(ex.rpe || ex.intensity) && <Text style={[styles.exerciseDetail, { color: theme.textSecondary }]}>RPE/Intensity: <Text style={{ color: theme.text, fontWeight: '600' }}>{ex.rpe || ex.intensity}</Text></Text>}
-          {ex.notes && <Text style={[styles.exerciseNotes, { color: theme.textSecondary }]}>{ex.notes}</Text>}
-        </View>
-      </View>
-    ));
+      );
+    });
   };
 
   // Helper to render a single day/session
@@ -168,11 +202,12 @@ export default function ProgramDetailScreen() {
 
   // Helper to render weeks/phases
   const renderProgramStructure = () => {
-    if (!ps) {
+    // Check if program_structure is empty or null
+    if (!ps || Object.keys(ps).length === 0) {
       return (
         <View style={[styles.card, { backgroundColor: theme.card }]}>
           <Text style={[styles.placeholderText, { color: theme.textSecondary }]}>
-            No program structure available.
+            No program structure available. The AI program generation may still be processing.
           </Text>
         </View>
       );
@@ -181,21 +216,62 @@ export default function ProgramDetailScreen() {
     // Try different structures the AI might return
     const phases = ps.phases || ps.weeks || ps.program || ps.schedule || null;
 
-    if (Array.isArray(phases)) {
+    if (Array.isArray(phases) && phases.length > 0) {
       return phases.map((phase: any, phaseIdx: number) => {
-        const phaseName = phase.phase || phase.name || phase.week_range || `Phase ${phaseIdx + 1}`;
+        const phaseName = phase.phaseName || phase.phase || phase.name || phase.week_range || `Phase ${phaseIdx + 1}`;
         const phaseGoal = phase.goal || phase.focus || phase.description || '';
-        const days = phase.days || phase.sessions || phase.workouts || [];
-        const weekRange = phase.weeks || phase.week_range || phase.duration || '';
-
+        
+        // Handle nested weeks structure
+        const weeks = phase.weeks || [];
+        
         return (
           <View key={phaseIdx} style={styles.phaseSection}>
             <View style={[styles.phaseHeader, { backgroundColor: theme.primary }]}>
               <Text style={styles.phaseName}>{phaseName}</Text>
-              {weekRange ? <Text style={styles.phaseWeeks}>{weekRange}</Text> : null}
-              {phaseGoal ? <Text style={styles.phaseGoal}>{phaseGoal}</Text> : null}
+              {weeks.length > 0 && (
+                <Text style={styles.phaseWeeks}>{weeks.length} weeks</Text>
+              )}
+              {phaseGoal && <Text style={styles.phaseGoal}>{phaseGoal}</Text>}
             </View>
-            {Array.isArray(days) && days.map((day: any, dayIdx: number) => renderDay(day, dayIdx))}
+            
+            {/* Render weeks */}
+            {weeks.map((week: any, weekIdx: number) => {
+              const weekNumber = week.weekNumber || weekIdx + 1;
+              const weekPhase = week.phase || '';
+              const weekFocus = week.weeklyFocus || week.focus || '';
+              const workoutDays = week.workoutDays || week.days || week.sessions || [];
+              
+              return (
+                <View key={weekIdx} style={styles.weekSection}>
+                  <View style={[styles.weekHeader, { backgroundColor: theme.backgroundSecondary }]}>
+                    <Text style={[styles.weekTitle, { color: theme.text }]}>Week {weekNumber}</Text>
+                    {weekPhase && <Text style={[styles.weekPhase, { color: theme.primary }]}>{weekPhase}</Text>}
+                  </View>
+                  {weekFocus && (
+                    <Text style={[styles.weekFocus, { color: theme.textSecondary }]}>{weekFocus}</Text>
+                  )}
+                  
+                  {/* Render workout days */}
+                  {Array.isArray(workoutDays) && workoutDays.map((day: any, dayIdx: number) => {
+                    const dayName = day.dayName || day.day || day.name || `Day ${dayIdx + 1}`;
+                    const focus = day.focus || day.muscle_focus || day.type || '';
+                    const exercises = day.exercises || day.workout || [];
+                    
+                    return (
+                      <View key={dayIdx} style={[styles.dayCard, { backgroundColor: theme.card }]}>
+                        <View style={styles.dayHeader}>
+                          <Text style={[styles.dayTitle, { color: theme.text }]}>{dayName}</Text>
+                          {focus && <Text style={[styles.dayFocus, { color: theme.primary }]}>{focus}</Text>}
+                        </View>
+                        {renderExercises(exercises)}
+                        {day.notes && <Text style={[styles.dayNotes, { color: theme.textSecondary }]}>{day.notes}</Text>}
+                      </View>
+                    );
+                  })}
+                </View>
+              );
+            })}
+            
             {phase.notes && (
               <View style={[styles.card, { backgroundColor: theme.card }]}>
                 <Text style={[styles.phaseNotes, { color: theme.textSecondary }]}>{phase.notes}</Text>
@@ -233,6 +309,15 @@ export default function ProgramDetailScreen() {
           headerTintColor: theme.text,
           headerShadowVisible: false,
           headerBackTitle: 'Back',
+          headerRight: () => (
+            <TouchableOpacity
+              onPress={loadProgramData}
+              style={{ marginRight: 12, padding: 8 }}
+              activeOpacity={0.7}
+            >
+              <Text style={{ color: theme.primary, fontSize: 14, fontWeight: '600' }}>Refresh</Text>
+            </TouchableOpacity>
+          ),
         }}
       />
 
@@ -282,6 +367,18 @@ export default function ProgramDetailScreen() {
           )}
           {ps?.notes && !ps?.overview && (
             <Text style={[styles.overviewText, { color: theme.textSecondary }]}>{ps.notes}</Text>
+          )}
+          {ps?.progressionStrategy && (
+            <View style={[styles.strategyBox, { backgroundColor: theme.highlight, borderColor: theme.primary }]}>
+              <Text style={[styles.strategyLabel, { color: theme.primary }]}>📈 Progression Strategy</Text>
+              <Text style={[styles.strategyText, { color: theme.textSecondary }]}>{ps.progressionStrategy}</Text>
+            </View>
+          )}
+          {ps?.volumeDistribution && (
+            <View style={[styles.strategyBox, { backgroundColor: theme.highlight, borderColor: theme.primary }]}>
+              <Text style={[styles.strategyLabel, { color: theme.primary }]}>⚖️ Volume Distribution</Text>
+              <Text style={[styles.strategyText, { color: theme.textSecondary }]}>{ps.volumeDistribution}</Text>
+            </View>
           )}
         </View>
 
@@ -396,6 +493,32 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontStyle: 'italic',
   },
+  weekSection: {
+    marginBottom: 12,
+  },
+  weekHeader: {
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 6,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  weekTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  weekPhase: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  weekFocus: {
+    fontSize: 13,
+    lineHeight: 18,
+    marginBottom: 8,
+    paddingHorizontal: 12,
+    fontStyle: 'italic',
+  },
   dayCard: {
     borderRadius: 12,
     padding: 16,
@@ -471,6 +594,22 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'monospace',
     lineHeight: 18,
+  },
+  strategyBox: {
+    borderRadius: 10,
+    padding: 12,
+    marginTop: 12,
+    borderWidth: 1,
+  },
+  strategyLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    marginBottom: 4,
+    letterSpacing: 0.2,
+  },
+  strategyText: {
+    fontSize: 13,
+    lineHeight: 20,
   },
   modalOverlay: {
     flex: 1,
