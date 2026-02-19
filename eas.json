@@ -11,6 +11,9 @@
       "ios": {
         "resourceClass": "m-medium"
       },
+      "android": {
+        "resourceClass": "m-medium"
+      },
       "env": {
         "BACKEND_URL": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev"
       }
@@ -18,6 +21,9 @@
     "preview": {
       "distribution": "internal",
       "ios": {
+        "resourceClass": "m-medium"
+      },
+      "android": {
         "resourceClass": "m-medium"
       },
       "env": {
@@ -30,6 +36,7 @@
         "simulator": false
       },
       "android": {
+        "resourceClass": "m-medium",
         "buildType": "apk"
       },
       "env": {
