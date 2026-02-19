@@ -21,7 +21,7 @@ const BACKEND_URL =
 
 async function apiGet<T>(path: string): Promise<T> {
   const url = `${BACKEND_URL}${path}`;
-  console.log(`[API] GET ${url}`);
+  console.log(`[PROGRAM] GET ${url}`);
   const response = await fetch(url, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
@@ -32,7 +32,8 @@ async function apiGet<T>(path: string): Promise<T> {
     throw new Error(msg);
   }
   const data = await response.json();
-  console.log(`[API] GET ${url} response:`, data);
+  console.log(`[PROGRAM] GET ${url} response received, structure keys:`, Object.keys(data.program_structure || {}));
+  console.log(`[PROGRAM] Full program data:`, JSON.stringify(data, null, 2));
   return data as T;
 }
 
@@ -59,19 +60,22 @@ export default function ProgramDetailScreen() {
   });
 
   useEffect(() => {
-    console.log('ProgramDetailScreen mounted for program:', programId);
+    console.log('[PROGRAM] ProgramDetailScreen mounted for program:', programId);
     loadProgramData();
   }, [programId]);
 
   const loadProgramData = async () => {
     try {
       setLoading(true);
-      console.log('[API] Fetching program details for:', programId);
+      console.log('[PROGRAM] Fetching program details for:', programId);
       const data = await apiGet<ProgramDetails>(`/api/programs/${programId}`);
-      console.log('[API] Program structure received:', JSON.stringify(data.program_structure)?.slice(0, 200));
+      console.log('[PROGRAM] Program loaded successfully');
+      console.log('[PROGRAM] Program structure type:', typeof data.program_structure);
+      console.log('[PROGRAM] Program structure is array?', Array.isArray(data.program_structure));
+      console.log('[PROGRAM] Program structure keys:', data.program_structure ? Object.keys(data.program_structure) : 'null');
       setProgram(data);
     } catch (error: any) {
-      console.error('[API] Error loading program data:', error);
+      console.error('[PROGRAM] Error loading program data:', error);
       setErrorModal({ visible: true, message: error?.message || 'Failed to load program. Please try again.' });
     } finally {
       setLoading(false);
@@ -93,6 +97,7 @@ export default function ProgramDetailScreen() {
         />
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.primary} />
+          <Text style={[styles.loadingText, { color: theme.textSecondary }]}>Loading program...</Text>
         </View>
       </View>
     );
@@ -123,9 +128,20 @@ export default function ProgramDetailScreen() {
   const weeksText = `${program.duration_weeks} weeks`;
   const ps = program.program_structure;
 
+  console.log('[PROGRAM] Rendering program structure, ps:', ps ? 'exists' : 'null');
+  console.log('[PROGRAM] ps.phases exists?', ps?.phases ? 'yes' : 'no');
+
   // Helper to render exercises in a day
   const renderExercises = (exercises: any[]) => {
-    if (!exercises || exercises.length === 0) return null;
+    console.log('[PROGRAM] renderExercises called with:', exercises?.length || 0, 'exercises');
+    if (!exercises || exercises.length === 0) {
+      console.log('[PROGRAM] No exercises to render');
+      return (
+        <Text style={[styles.noExercisesText, { color: theme.textSecondary }]}>
+          No exercises defined for this day
+        </Text>
+      );
+    }
     return exercises.map((ex: any, idx: number) => {
       const exerciseName = ex.exerciseName || ex.name || ex.exercise_name || ex.exercise || 'Exercise';
       const sets = ex.sets || '';
@@ -135,6 +151,8 @@ export default function ProgramDetailScreen() {
       const rpe = ex.rpeOrIntensity || ex.rpe || ex.intensity || '';
       const muscleGroup = ex.muscle_group || ex.muscleGroup || '';
       const notes = ex.notes || '';
+      
+      console.log('[PROGRAM] Rendering exercise:', exerciseName);
       
       return (
         <View key={idx} style={[styles.exerciseRow, { borderBottomColor: theme.border }]}>
@@ -183,27 +201,13 @@ export default function ProgramDetailScreen() {
     });
   };
 
-  // Helper to render a single day/session
-  const renderDay = (day: any, dayIdx: number) => {
-    const dayName = day.day || day.day_name || day.name || `Day ${dayIdx + 1}`;
-    const focus = day.focus || day.muscle_focus || day.type || '';
-    const exercises = day.exercises || day.workout || [];
-    return (
-      <View key={dayIdx} style={[styles.dayCard, { backgroundColor: theme.card }]}>
-        <View style={styles.dayHeader}>
-          <Text style={[styles.dayTitle, { color: theme.text }]}>{dayName}</Text>
-          {focus ? <Text style={[styles.dayFocus, { color: theme.primary }]}>{focus}</Text> : null}
-        </View>
-        {renderExercises(exercises)}
-        {day.notes && <Text style={[styles.dayNotes, { color: theme.textSecondary }]}>{day.notes}</Text>}
-      </View>
-    );
-  };
-
   // Helper to render weeks/phases
   const renderProgramStructure = () => {
+    console.log('[PROGRAM] renderProgramStructure called');
+    
     // Check if program_structure is empty or null
     if (!ps || Object.keys(ps).length === 0) {
+      console.log('[PROGRAM] Program structure is empty or null');
       return (
         <View style={[styles.card, { backgroundColor: theme.card }]}>
           <Text style={[styles.placeholderText, { color: theme.textSecondary }]}>
@@ -213,16 +217,27 @@ export default function ProgramDetailScreen() {
       );
     }
 
+    console.log('[PROGRAM] Program structure exists, checking for phases...');
+    
     // Try different structures the AI might return
     const phases = ps.phases || ps.weeks || ps.program || ps.schedule || null;
 
+    console.log('[PROGRAM] Phases found?', phases ? 'yes' : 'no');
+    console.log('[PROGRAM] Phases is array?', Array.isArray(phases));
+    console.log('[PROGRAM] Phases length:', phases?.length || 0);
+
     if (Array.isArray(phases) && phases.length > 0) {
+      console.log('[PROGRAM] Rendering', phases.length, 'phases');
       return phases.map((phase: any, phaseIdx: number) => {
         const phaseName = phase.phaseName || phase.phase || phase.name || phase.week_range || `Phase ${phaseIdx + 1}`;
         const phaseGoal = phase.goal || phase.focus || phase.description || '';
         
+        console.log('[PROGRAM] Rendering phase:', phaseName);
+        
         // Handle nested weeks structure
         const weeks = phase.weeks || [];
+        
+        console.log('[PROGRAM] Phase has', weeks.length, 'weeks');
         
         return (
           <View key={phaseIdx} style={styles.phaseSection}>
@@ -241,6 +256,8 @@ export default function ProgramDetailScreen() {
               const weekFocus = week.weeklyFocus || week.focus || '';
               const workoutDays = week.workoutDays || week.days || week.sessions || [];
               
+              console.log('[PROGRAM] Rendering week', weekNumber, 'with', workoutDays.length, 'days');
+              
               return (
                 <View key={weekIdx} style={styles.weekSection}>
                   <View style={[styles.weekHeader, { backgroundColor: theme.backgroundSecondary }]}>
@@ -256,6 +273,8 @@ export default function ProgramDetailScreen() {
                     const dayName = day.dayName || day.day || day.name || `Day ${dayIdx + 1}`;
                     const focus = day.focus || day.muscle_focus || day.type || '';
                     const exercises = day.exercises || day.workout || [];
+                    
+                    console.log('[PROGRAM] Rendering day:', dayName, 'with', exercises.length, 'exercises');
                     
                     return (
                       <View key={dayIdx} style={[styles.dayCard, { backgroundColor: theme.card }]}>
@@ -282,19 +301,43 @@ export default function ProgramDetailScreen() {
       });
     }
 
+    console.log('[PROGRAM] No phases array found, checking for direct days...');
+
     // If it's a flat structure with days directly
     const directDays = ps.days || ps.sessions || ps.workouts || [];
     if (Array.isArray(directDays) && directDays.length > 0) {
-      return directDays.map((day: any, dayIdx: number) => renderDay(day, dayIdx));
+      console.log('[PROGRAM] Rendering', directDays.length, 'direct days');
+      return directDays.map((day: any, dayIdx: number) => {
+        const dayName = day.day || day.day_name || day.name || `Day ${dayIdx + 1}`;
+        const focus = day.focus || day.muscle_focus || day.type || '';
+        const exercises = day.exercises || day.workout || [];
+        return (
+          <View key={dayIdx} style={[styles.dayCard, { backgroundColor: theme.card }]}>
+            <View style={styles.dayHeader}>
+              <Text style={[styles.dayTitle, { color: theme.text }]}>{dayName}</Text>
+              {focus ? <Text style={[styles.dayFocus, { color: theme.primary }]}>{focus}</Text> : null}
+            </View>
+            {renderExercises(exercises)}
+            {day.notes && <Text style={[styles.dayNotes, { color: theme.textSecondary }]}>{day.notes}</Text>}
+          </View>
+        );
+      });
     }
+
+    console.log('[PROGRAM] No recognizable structure found, showing raw JSON');
 
     // Fallback: show raw JSON in a readable format
     return (
       <View style={[styles.card, { backgroundColor: theme.card }]}>
-        <Text style={[styles.sectionTitle, { color: theme.text }]}>Program Details</Text>
-        <Text style={[styles.rawJson, { color: theme.textSecondary }]}>
-          {JSON.stringify(ps, null, 2)}
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Program Details (Raw)</Text>
+        <Text style={[styles.debugText, { color: theme.error }]}>
+          Unable to parse program structure. Showing raw data:
         </Text>
+        <ScrollView horizontal style={styles.rawJsonScroll}>
+          <Text style={[styles.rawJson, { color: theme.textSecondary }]}>
+            {JSON.stringify(ps, null, 2)}
+          </Text>
+        </ScrollView>
       </View>
     );
   };
@@ -398,6 +441,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 14,
+  },
   emptyState: {
     flex: 1,
     justifyContent: 'center',
@@ -432,10 +479,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginBottom: 8,
   },
-  programMeta: {
-    fontSize: 14,
-    marginBottom: 4,
-  },
   sectionTitle: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -444,6 +487,11 @@ const styles = StyleSheet.create({
   placeholderText: {
     fontSize: 14,
     lineHeight: 20,
+  },
+  debugText: {
+    fontSize: 13,
+    marginBottom: 8,
+    fontWeight: '600',
   },
   metaRow: {
     flexDirection: 'row',
@@ -550,6 +598,11 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     marginTop: 8,
   },
+  noExercisesText: {
+    fontSize: 13,
+    fontStyle: 'italic',
+    paddingVertical: 8,
+  },
   exerciseRow: {
     paddingVertical: 10,
     borderBottomWidth: 1,
@@ -590,10 +643,13 @@ const styles = StyleSheet.create({
     marginTop: 4,
     width: '100%',
   },
+  rawJsonScroll: {
+    maxHeight: 400,
+  },
   rawJson: {
-    fontSize: 12,
-    fontFamily: 'monospace',
-    lineHeight: 18,
+    fontSize: 11,
+    fontFamily: Platform.select({ ios: 'Courier', android: 'monospace', default: 'monospace' }),
+    lineHeight: 16,
   },
   strategyBox: {
     borderRadius: 10,
