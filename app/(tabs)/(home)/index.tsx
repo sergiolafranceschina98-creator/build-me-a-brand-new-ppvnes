@@ -15,6 +15,7 @@ import { Stack, useRouter, useFocusEffect } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
 import { colors } from '@/styles/commonStyles';
 import Constants from 'expo-constants';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const BACKEND_URL =
   (Constants.expoConfig?.extra?.backendUrl as string) ||
@@ -65,7 +66,7 @@ interface Client {
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
-  const theme = colors[colorScheme ?? 'light'];
+  const theme = colors[colorScheme ?? 'dark'];
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -130,18 +131,19 @@ export default function HomeScreen() {
 
   const emptyStateView = (
     <View style={styles.emptyState}>
-      <IconSymbol
-        ios_icon_name="person.3.fill"
-        android_material_icon_name="group"
-        size={80}
-        color={theme.textSecondary}
-        style={styles.emptyIcon}
-      />
+      <View style={[styles.emptyIconContainer, { backgroundColor: theme.highlight }]}>
+        <IconSymbol
+          ios_icon_name="person.3.fill"
+          android_material_icon_name="group"
+          size={64}
+          color={theme.primary}
+        />
+      </View>
       <Text style={[styles.emptyTitle, { color: theme.text }]}>
         No Clients Yet
       </Text>
       <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
-        Create your first client profile to generate AI-powered workout programs
+        Create your first client profile to generate AI-powered workout programs in under 60 seconds
       </Text>
     </View>
   );
@@ -159,16 +161,21 @@ export default function HomeScreen() {
         return (
           <TouchableOpacity
             key={client.id}
-            style={[styles.clientCard, { backgroundColor: theme.card }]}
+            style={[styles.clientCard, { backgroundColor: theme.card, borderColor: theme.border }]}
             onPress={() => handleClientPress(client.id)}
-            activeOpacity={0.7}
+            activeOpacity={0.8}
           >
             <View style={styles.clientHeader}>
-              <View style={[styles.avatar, { backgroundColor: theme.primary }]}>
+              <LinearGradient
+                colors={[theme.primary, theme.secondary]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.avatar}
+              >
                 <Text style={styles.avatarText}>
                   {client.name.charAt(0).toUpperCase()}
                 </Text>
-              </View>
+              </LinearGradient>
               <View style={styles.clientInfo}>
                 <Text style={[styles.clientName, { color: theme.text }]}>
                   {client.name}
@@ -177,20 +184,22 @@ export default function HomeScreen() {
                   {client.age} years old
                 </Text>
               </View>
-              <IconSymbol
-                ios_icon_name="chevron.right"
-                android_material_icon_name="arrow-forward"
-                size={20}
-                color={theme.textSecondary}
-              />
+              <View style={[styles.chevronContainer, { backgroundColor: theme.highlight }]}>
+                <IconSymbol
+                  ios_icon_name="chevron.right"
+                  android_material_icon_name="arrow-forward"
+                  size={18}
+                  color={theme.primary}
+                />
+              </View>
             </View>
             <View style={styles.clientDetails}>
-              <View style={[styles.badge, { backgroundColor: theme.highlight }]}>
+              <View style={[styles.badge, { backgroundColor: theme.highlight, borderColor: theme.primary }]}>
                 <Text style={[styles.badgeText, { color: theme.primary }]}>
                   {goalText}
                 </Text>
               </View>
-              <View style={[styles.badge, { backgroundColor: theme.highlight }]}>
+              <View style={[styles.badge, { backgroundColor: theme.highlight, borderColor: theme.primary }]}>
                 <Text style={[styles.badgeText, { color: theme.primary }]}>
                   {frequencyText}
                 </Text>
@@ -208,7 +217,7 @@ export default function HomeScreen() {
         options={{
           headerShown: true,
           title: 'AI Workout Builder',
-          headerStyle: { backgroundColor: theme.card },
+          headerStyle: { backgroundColor: theme.backgroundSecondary },
           headerTintColor: theme.text,
           headerShadowVisible: false,
           headerBackVisible: false,
@@ -218,7 +227,7 @@ export default function HomeScreen() {
               <TouchableOpacity
                 onPress={handleDeleteAllClients}
                 disabled={deletingAll}
-                style={{ marginRight: 8, padding: 4 }}
+                style={[styles.headerButton, { backgroundColor: theme.highlight }]}
                 activeOpacity={0.7}
               >
                 {deletingAll ? (
@@ -227,7 +236,7 @@ export default function HomeScreen() {
                   <IconSymbol
                     ios_icon_name="trash"
                     android_material_icon_name="delete"
-                    size={22}
+                    size={20}
                     color={theme.error}
                   />
                 )}
@@ -243,14 +252,14 @@ export default function HomeScreen() {
         animationType="fade"
         onRequestClose={() => setErrorModal({ visible: false, message: '' })}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: theme.card }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>Error</Text>
             <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
               {errorModal.message}
             </Text>
             <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: theme.primary }]}
+              style={[styles.modalButton, { backgroundColor: theme.error }]}
               onPress={() => setErrorModal({ visible: false, message: '' })}
             >
               <Text style={styles.modalButtonText}>OK</Text>
@@ -266,15 +275,15 @@ export default function HomeScreen() {
         animationType="fade"
         onRequestClose={() => setConfirmDeleteModal(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: theme.card }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>Delete All Clients</Text>
             <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
               Are you sure you want to delete all clients? This action cannot be undone.
             </Text>
             <View style={styles.modalButtonRow}>
               <TouchableOpacity
-                style={[styles.modalButtonHalf, { backgroundColor: theme.border }]}
+                style={[styles.modalButtonHalf, { backgroundColor: theme.card, borderColor: theme.borderLight }]}
                 onPress={() => setConfirmDeleteModal(false)}
               >
                 <Text style={[styles.modalButtonText, { color: theme.text }]}>Cancel</Text>
@@ -309,20 +318,25 @@ export default function HomeScreen() {
         clientsList
       )}
 
-      <View style={[styles.fabContainer, Platform.OS === 'android' && styles.fabContainerAndroid]}>
-        <TouchableOpacity
-          style={[styles.fab, { backgroundColor: theme.primary }]}
-          onPress={handleCreateClient}
-          activeOpacity={0.8}
+      <TouchableOpacity
+        style={[styles.fabContainer, Platform.OS === 'android' && styles.fabContainerAndroid]}
+        onPress={handleCreateClient}
+        activeOpacity={0.9}
+      >
+        <LinearGradient
+          colors={[theme.primary, theme.secondary]}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 1 }}
+          style={styles.fab}
         >
           <IconSymbol
             ios_icon_name="plus"
             android_material_icon_name="add"
-            size={28}
+            size={32}
             color="#FFFFFF"
           />
-        </TouchableOpacity>
-      </View>
+        </LinearGradient>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -332,18 +346,24 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 16,
+    paddingHorizontal: 24,
+    paddingTop: 24,
+    paddingBottom: 20,
   },
   title: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: 'bold',
     marginBottom: 8,
+    letterSpacing: -0.5,
   },
   subtitle: {
     fontSize: 16,
-    lineHeight: 22,
+    lineHeight: 24,
+  },
+  headerButton: {
+    marginRight: 12,
+    padding: 10,
+    borderRadius: 12,
   },
   loadingContainer: {
     flex: 1,
@@ -356,11 +376,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 40,
   },
-  emptyIcon: {
-    marginBottom: 24,
+  emptyIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 28,
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 'bold',
     marginBottom: 12,
     textAlign: 'center',
@@ -374,112 +399,124 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingBottom: 100,
+    paddingHorizontal: 24,
+    paddingBottom: 120,
   },
   clientCard: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   clientHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 12,
+    marginRight: 16,
   },
   avatarText: {
     color: '#FFFFFF',
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
   },
   clientInfo: {
     flex: 1,
   },
   clientName: {
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 20,
+    fontWeight: '700',
     marginBottom: 4,
+    letterSpacing: -0.3,
   },
   clientMeta: {
     fontSize: 14,
   },
+  chevronContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
   clientDetails: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: 10,
   },
   badge: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 10,
+    borderWidth: 1,
   },
   badgeText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   fabContainer: {
     position: 'absolute',
-    bottom: 90,
-    right: 20,
+    bottom: 100,
+    right: 24,
   },
   fabContainerAndroid: {
-    bottom: 20,
+    bottom: 24,
   },
   fab: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 68,
+    height: 68,
+    borderRadius: 34,
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 8,
-    elevation: 8,
+    shadowColor: '#FF6B35',
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.5,
+    shadowRadius: 12,
+    elevation: 10,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
   },
   modalBox: {
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 24,
+    padding: 28,
     width: '100%',
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 12,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 14,
+    letterSpacing: -0.3,
   },
   modalMessage: {
-    fontSize: 15,
-    lineHeight: 22,
-    marginBottom: 20,
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 24,
   },
   modalButton: {
-    borderRadius: 10,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingVertical: 16,
     alignItems: 'center',
   },
   modalButtonRow: {
@@ -488,13 +525,15 @@ const styles = StyleSheet.create({
   },
   modalButtonHalf: {
     flex: 1,
-    borderRadius: 10,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingVertical: 16,
     alignItems: 'center',
+    borderWidth: 1,
   },
   modalButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });

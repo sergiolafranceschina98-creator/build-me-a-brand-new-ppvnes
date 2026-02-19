@@ -15,6 +15,7 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 import Constants from 'expo-constants';
+import { LinearGradient } from 'expo-linear-gradient';
 
 const BACKEND_URL =
   (Constants.expoConfig?.extra?.backendUrl as string) ||
@@ -83,7 +84,7 @@ interface WorkoutProgram {
 
 export default function ClientDetailScreen() {
   const colorScheme = useColorScheme();
-  const theme = colors[colorScheme ?? 'light'];
+  const theme = colors[colorScheme ?? 'dark'];
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const clientId = Array.isArray(id) ? id[0] : id;
@@ -134,8 +135,8 @@ export default function ClientDetailScreen() {
         {}
       );
       console.log('Program generated successfully:', newProgram);
-      setSuccessModal({ visible: true, message: `"${newProgram.program_name}" has been generated successfully! It's a ${newProgram.duration_weeks}-week ${newProgram.split_type} program.` });
-      // Reload programs after generation
+      const successMessage = `"${newProgram.program_name}" has been generated successfully! It's a ${newProgram.duration_weeks}-week ${newProgram.split_type} program.`;
+      setSuccessModal({ visible: true, message: successMessage });
       const programsData = await apiGet<WorkoutProgram[]>(`/api/clients/${clientId}/programs`);
       setPrograms(programsData);
     } catch (error: any) {
@@ -158,7 +159,7 @@ export default function ClientDetailScreen() {
           options={{
             headerShown: true,
             title: 'Client Details',
-            headerStyle: { backgroundColor: theme.card },
+            headerStyle: { backgroundColor: theme.backgroundSecondary },
             headerTintColor: theme.text,
             headerShadowVisible: false,
             headerBackTitle: 'Back',
@@ -178,7 +179,7 @@ export default function ClientDetailScreen() {
           options={{
             headerShown: true,
             title: 'Client Details',
-            headerStyle: { backgroundColor: theme.card },
+            headerStyle: { backgroundColor: theme.backgroundSecondary },
             headerTintColor: theme.text,
             headerShadowVisible: false,
             headerBackTitle: 'Back',
@@ -206,7 +207,7 @@ export default function ClientDetailScreen() {
         options={{
           headerShown: true,
           title: client.name,
-          headerStyle: { backgroundColor: theme.card },
+          headerStyle: { backgroundColor: theme.backgroundSecondary },
           headerTintColor: theme.text,
           headerShadowVisible: false,
           headerBackTitle: 'Back',
@@ -220,8 +221,8 @@ export default function ClientDetailScreen() {
         animationType="fade"
         onRequestClose={() => setErrorModal({ visible: false, message: '' })}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: theme.card }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>Error</Text>
             <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
               {errorModal.message}
@@ -243,8 +244,8 @@ export default function ClientDetailScreen() {
         animationType="fade"
         onRequestClose={() => setSuccessModal({ visible: false, message: '' })}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: theme.card }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>🎉 Program Generated!</Text>
             <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
               {successModal.message}
@@ -264,13 +265,18 @@ export default function ClientDetailScreen() {
         contentContainerStyle={[styles.scrollContent, Platform.OS === 'android' && styles.scrollContentAndroid]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
+        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <View style={styles.cardHeader}>
-            <View style={[styles.avatar, { backgroundColor: theme.primary }]}>
+            <LinearGradient
+              colors={[theme.primary, theme.secondary]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.avatar}
+            >
               <Text style={styles.avatarText}>
                 {client.name.charAt(0).toUpperCase()}
               </Text>
-            </View>
+            </LinearGradient>
             <View style={styles.cardHeaderInfo}>
               <Text style={[styles.clientName, { color: theme.text }]}>
                 {client.name}
@@ -287,61 +293,61 @@ export default function ClientDetailScreen() {
           <View style={styles.statsGrid}>
             <View style={styles.statItem}>
               <Text style={[styles.statValue, { color: theme.text }]}>{heightText}</Text>
-              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Height</Text>
+              <Text style={[styles.statLabel, { color: theme.textTertiary }]}>HEIGHT</Text>
             </View>
             <View style={styles.statItem}>
               <Text style={[styles.statValue, { color: theme.text }]}>{weightText}</Text>
-              <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Weight</Text>
+              <Text style={[styles.statLabel, { color: theme.textTertiary }]}>WEIGHT</Text>
             </View>
             {client.body_fat_percentage && (
               <View style={styles.statItem}>
                 <Text style={[styles.statValue, { color: theme.text }]}>
                   {client.body_fat_percentage}%
                 </Text>
-                <Text style={[styles.statLabel, { color: theme.textSecondary }]}>Body Fat</Text>
+                <Text style={[styles.statLabel, { color: theme.textTertiary }]}>BODY FAT</Text>
               </View>
             )}
           </View>
         </View>
 
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
+        <View style={[styles.card, { backgroundColor: theme.card, borderColor: theme.border }]}>
           <Text style={[styles.cardTitle, { color: theme.text }]}>Training Profile</Text>
           
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Experience</Text>
+          <View style={[styles.infoRow, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.infoLabel, { color: theme.textTertiary }]}>EXPERIENCE</Text>
             <Text style={[styles.infoValue, { color: theme.text }]}>{experienceText}</Text>
           </View>
           
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Goal</Text>
+          <View style={[styles.infoRow, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.infoLabel, { color: theme.textTertiary }]}>GOAL</Text>
             <Text style={[styles.infoValue, { color: theme.text }]}>{client.goals}</Text>
           </View>
           
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Frequency</Text>
+          <View style={[styles.infoRow, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.infoLabel, { color: theme.textTertiary }]}>FREQUENCY</Text>
             <Text style={[styles.infoValue, { color: theme.text }]}>{frequencyText}</Text>
           </View>
           
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Session Duration</Text>
+          <View style={[styles.infoRow, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.infoLabel, { color: theme.textTertiary }]}>SESSION</Text>
             <Text style={[styles.infoValue, { color: theme.text }]}>{durationText}</Text>
           </View>
           
-          <View style={styles.infoRow}>
-            <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Equipment</Text>
+          <View style={[styles.infoRow, { borderBottomColor: theme.border }]}>
+            <Text style={[styles.infoLabel, { color: theme.textTertiary }]}>EQUIPMENT</Text>
             <Text style={[styles.infoValue, { color: theme.text }]}>{client.equipment}</Text>
           </View>
 
           {client.injuries && (
-            <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Injuries</Text>
+            <View style={[styles.infoRow, { borderBottomColor: theme.border }]}>
+              <Text style={[styles.infoLabel, { color: theme.textTertiary }]}>INJURIES</Text>
               <Text style={[styles.infoValue, { color: theme.text }]}>{client.injuries}</Text>
             </View>
           )}
 
           {client.preferred_exercises && (
-            <View style={styles.infoRow}>
-              <Text style={[styles.infoLabel, { color: theme.textSecondary }]}>Preferred Exercises</Text>
+            <View style={[styles.infoRow, { borderBottomColor: 'transparent' }]}>
+              <Text style={[styles.infoLabel, { color: theme.textTertiary }]}>PREFERRED</Text>
               <Text style={[styles.infoValue, { color: theme.text }]}>{client.preferred_exercises}</Text>
             </View>
           )}
@@ -353,37 +359,44 @@ export default function ClientDetailScreen() {
               Workout Programs
             </Text>
             <TouchableOpacity
-              style={[styles.generateButton, { backgroundColor: theme.primary }]}
               onPress={handleGenerateProgram}
               disabled={generating}
-              activeOpacity={0.8}
+              activeOpacity={0.9}
             >
-              {generating ? (
-                <ActivityIndicator color="#FFFFFF" size="small" />
-              ) : (
-                <React.Fragment>
-                  <IconSymbol
-                    ios_icon_name="sparkles"
-                    android_material_icon_name="auto-awesome"
-                    size={18}
-                    color="#FFFFFF"
-                    style={styles.buttonIcon}
-                  />
-                  <Text style={styles.generateButtonText}>Generate AI Program</Text>
-                </React.Fragment>
-              )}
+              <LinearGradient
+                colors={[theme.primary, theme.secondary]}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={styles.generateButton}
+              >
+                {generating ? (
+                  <ActivityIndicator color="#FFFFFF" size="small" />
+                ) : (
+                  <React.Fragment>
+                    <IconSymbol
+                      ios_icon_name="sparkles"
+                      android_material_icon_name="auto-awesome"
+                      size={20}
+                      color="#FFFFFF"
+                      style={styles.buttonIcon}
+                    />
+                    <Text style={styles.generateButtonText}>Generate AI Program</Text>
+                  </React.Fragment>
+                )}
+              </LinearGradient>
             </TouchableOpacity>
           </View>
 
           {programs.length === 0 ? (
-            <View style={[styles.emptyProgramsCard, { backgroundColor: theme.card }]}>
-              <IconSymbol
-                ios_icon_name="doc.text"
-                android_material_icon_name="description"
-                size={48}
-                color={theme.textSecondary}
-                style={styles.emptyIcon}
-              />
+            <View style={[styles.emptyProgramsCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
+              <View style={[styles.emptyIconContainer, { backgroundColor: theme.highlight }]}>
+                <IconSymbol
+                  ios_icon_name="doc.text"
+                  android_material_icon_name="description"
+                  size={48}
+                  color={theme.primary}
+                />
+              </View>
               <Text style={[styles.emptyProgramsText, { color: theme.textSecondary }]}>
                 No programs yet. Generate an AI-powered workout program to get started.
               </Text>
@@ -395,28 +408,36 @@ export default function ClientDetailScreen() {
               return (
                 <TouchableOpacity
                   key={program.id}
-                  style={[styles.programCard, { backgroundColor: theme.card }]}
+                  style={[styles.programCard, { backgroundColor: theme.card, borderColor: theme.border }]}
                   onPress={() => handleProgramPress(program.id)}
-                  activeOpacity={0.7}
+                  activeOpacity={0.8}
                 >
                   <View style={styles.programHeader}>
                     <View style={styles.programInfo}>
                       <Text style={[styles.programName, { color: theme.text }]}>
                         {program.program_name}
                       </Text>
-                      <Text style={[styles.programMeta, { color: theme.textSecondary }]}>
-                        {program.split_type}
-                      </Text>
-                      <Text style={[styles.programMeta, { color: theme.textSecondary }]}>
-                        {weeksText}
-                      </Text>
+                      <View style={styles.programMetaRow}>
+                        <View style={[styles.programBadge, { backgroundColor: theme.highlight, borderColor: theme.primary }]}>
+                          <Text style={[styles.programBadgeText, { color: theme.primary }]}>
+                            {program.split_type}
+                          </Text>
+                        </View>
+                        <View style={[styles.programBadge, { backgroundColor: theme.highlight, borderColor: theme.primary }]}>
+                          <Text style={[styles.programBadgeText, { color: theme.primary }]}>
+                            {weeksText}
+                          </Text>
+                        </View>
+                      </View>
                     </View>
-                    <IconSymbol
-                      ios_icon_name="chevron.right"
-                      android_material_icon_name="arrow-forward"
-                      size={20}
-                      color={theme.textSecondary}
-                    />
+                    <View style={[styles.chevronContainer, { backgroundColor: theme.highlight }]}>
+                      <IconSymbol
+                        ios_icon_name="chevron.right"
+                        android_material_icon_name="arrow-forward"
+                        size={18}
+                        color={theme.primary}
+                      />
+                    </View>
                   </View>
                 </TouchableOpacity>
               );
@@ -449,87 +470,96 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: 24,
+    paddingTop: 24,
     paddingBottom: 40,
   },
   scrollContentAndroid: {
     paddingTop: 48,
   },
   card: {
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 16,
+    borderRadius: 20,
+    padding: 24,
+    marginBottom: 20,
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: 72,
+    height: 72,
+    borderRadius: 36,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 16,
+    marginRight: 20,
   },
   avatarText: {
     color: '#FFFFFF',
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
   },
   cardHeaderInfo: {
     flex: 1,
   },
   clientName: {
-    fontSize: 24,
+    fontSize: 26,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 6,
+    letterSpacing: -0.5,
   },
   clientMeta: {
-    fontSize: 14,
-    marginBottom: 2,
+    fontSize: 15,
+    marginBottom: 3,
   },
   statsGrid: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    paddingTop: 20,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(255, 255, 255, 0.1)',
   },
   statItem: {
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 6,
   },
   statLabel: {
-    fontSize: 12,
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
   },
   cardTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 16,
+    marginBottom: 20,
+    letterSpacing: -0.3,
   },
   infoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 10,
+    paddingVertical: 14,
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(0,0,0,0.05)',
   },
   infoLabel: {
-    fontSize: 14,
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
     flex: 1,
   },
   infoValue: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '600',
     flex: 1,
     textAlign: 'right',
@@ -538,55 +568,69 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   programsHeader: {
-    marginBottom: 16,
+    marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 16,
+    letterSpacing: -0.3,
   },
   generateButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
-    padding: 16,
+    borderRadius: 16,
+    padding: 18,
+    shadowColor: '#FF6B35',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 6,
   },
   buttonIcon: {
-    marginRight: 8,
+    marginRight: 10,
   },
   generateButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   emptyProgramsCard: {
-    borderRadius: 16,
-    padding: 32,
+    borderRadius: 20,
+    padding: 36,
     alignItems: 'center',
+    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
+    shadowOpacity: 0.2,
     shadowRadius: 8,
-    elevation: 3,
+    elevation: 4,
   },
-  emptyIcon: {
-    marginBottom: 16,
+  emptyIconContainer: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 20,
   },
   emptyProgramsText: {
-    fontSize: 14,
+    fontSize: 15,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: 22,
   },
   programCard: {
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 12,
+    borderRadius: 20,
+    padding: 20,
+    marginBottom: 16,
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   programHeader: {
     flexDirection: 'row',
@@ -596,49 +640,70 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   programName: {
-    fontSize: 18,
-    fontWeight: '600',
-    marginBottom: 4,
+    fontSize: 19,
+    fontWeight: '700',
+    marginBottom: 12,
+    letterSpacing: -0.3,
   },
-  programMeta: {
-    fontSize: 13,
-    marginBottom: 2,
+  programMetaRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  programBadge: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+  },
+  programBadgeText: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.3,
+  },
+  chevronContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
   },
   modalBox: {
-    borderRadius: 16,
-    padding: 24,
+    borderRadius: 24,
+    padding: 28,
     width: '100%',
+    borderWidth: 1,
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    elevation: 8,
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 12,
   },
   modalTitle: {
-    fontSize: 18,
+    fontSize: 22,
     fontWeight: 'bold',
-    marginBottom: 12,
+    marginBottom: 14,
+    letterSpacing: -0.3,
   },
   modalMessage: {
-    fontSize: 15,
-    lineHeight: 22,
-    marginBottom: 20,
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 24,
   },
   modalButton: {
-    borderRadius: 10,
-    paddingVertical: 12,
+    borderRadius: 14,
+    paddingVertical: 16,
     alignItems: 'center',
   },
   modalButtonText: {
     color: '#FFFFFF',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });
