@@ -72,7 +72,9 @@ export default function ProgramDetailScreen() {
       console.log('[PROGRAM] Program loaded successfully');
       console.log('[PROGRAM] Program structure type:', typeof data.program_structure);
       console.log('[PROGRAM] Program structure is array?', Array.isArray(data.program_structure));
-      console.log('[PROGRAM] Program structure keys:', data.program_structure ? Object.keys(data.program_structure) : 'null');
+      const structureKeys = data.program_structure ? Object.keys(data.program_structure) : [];
+      console.log('[PROGRAM] Program structure keys:', structureKeys);
+      console.log('[PROGRAM] Program structure has content?', structureKeys.length > 0 ? 'YES' : 'NO - empty object, program may need regeneration');
       setProgram(data);
     } catch (error: any) {
       console.error('[PROGRAM] Error loading program data:', error);
@@ -210,8 +212,12 @@ export default function ProgramDetailScreen() {
       console.log('[PROGRAM] Program structure is empty or null');
       return (
         <View style={[styles.card, { backgroundColor: theme.card }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>⚠️ Program Data Unavailable</Text>
           <Text style={[styles.placeholderText, { color: theme.textSecondary }]}>
-            No program structure available. The AI program generation may still be processing.
+            This program was generated before a recent update and its workout details could not be retrieved.
+          </Text>
+          <Text style={[styles.placeholderText, { color: theme.textSecondary, marginTop: 10 }]}>
+            Please go back to the client profile and tap <Text style={{ color: theme.primary, fontWeight: '700' }}>"Generate AI Program"</Text> to create a new program with full workout details.
           </Text>
         </View>
       );
