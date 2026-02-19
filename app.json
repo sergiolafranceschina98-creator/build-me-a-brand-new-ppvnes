@@ -19,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.aiworkoutbuilder.app",
-      "buildNumber": "1.0.1",
+      "buildNumber": "2",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -29,7 +29,8 @@
         "foregroundImage": "./assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.aiworkoutbuilder.app"
+      "package": "com.aiworkoutbuilder.app",
+      "versionCode": 2
     },
     "web": {
       "bundler": "metro",
