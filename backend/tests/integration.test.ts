@@ -227,6 +227,41 @@ describe("API Integration Tests", () => {
       await expectStatus(res, 400);
     });
 
+    test("Delete program with invalid UUID format", async () => {
+      const res = await api(`/api/programs/invalid-uuid`, {
+        method: "DELETE",
+      });
+      await expectStatus(res, 400);
+    });
+
+    test("Delete nonexistent program", async () => {
+      const res = await api(`/api/programs/00000000-0000-0000-0000-000000000000`, {
+        method: "DELETE",
+      });
+      await expectStatus(res, 404);
+    });
+
+    test("Generate second program to test individual deletion", async () => {
+      const res = await api(`/api/clients/${clientId}/generate-program`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      await expectStatus(res, 201);
+      const data = await res.json();
+      const secondProgramId = data.id;
+      expect(secondProgramId).toBeDefined();
+
+      // Test deletion of the second program
+      const deleteRes = await api(`/api/programs/${secondProgramId}`, {
+        method: "DELETE",
+      });
+      await expectStatus(deleteRes, 200);
+      const deleteData = await deleteRes.json();
+      expect(deleteData.success).toBe(true);
+      expect(deleteData.message).toBe("Program deleted successfully");
+    });
+
     test("Delete client (also deletes associated programs)", async () => {
       const res = await api(`/api/clients/${clientId}`, {
         method: "DELETE",

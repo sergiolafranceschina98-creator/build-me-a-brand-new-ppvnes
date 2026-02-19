@@ -288,6 +288,55 @@ export function register(app: App, fastify: FastifyInstance) {
       created_at: program.createdAt,
     };
   });
+
+  // Delete a program
+  fastify.delete<{ Params: { id: string } }>('/api/programs/:id', {
+    schema: {
+      description: 'Delete a workout program by ID',
+      tags: ['programs'],
+      params: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+        },
+      },
+      response: {
+        200: {
+          type: 'object',
+          properties: {
+            success: { type: 'boolean' },
+            message: { type: 'string' },
+          },
+        },
+        404: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
+          },
+        },
+      },
+    },
+  }, async (request, reply) => {
+    const { id } = request.params;
+    app.logger.info({ programId: id }, 'Deleting program');
+
+    const deletedProgram = await app.db
+      .delete(schema.workoutPrograms)
+      .where(eq(schema.workoutPrograms.id, id))
+      .returning();
+
+    if (deletedProgram.length === 0) {
+      app.logger.warn({ programId: id }, 'Program not found for deletion');
+      return reply.status(404).send({ error: 'Program not found' });
+    }
+
+    app.logger.info({ programId: id }, 'Program deleted successfully');
+    return reply.status(200).send({
+      success: true,
+      message: 'Program deleted successfully',
+    });
+  });
 }
 
 function determineSplitType(trainingFrequency: number, goals: string): string {
@@ -345,7 +394,7 @@ function generateFallbackProgram(client: any) {
           phase: i < 4 ? 'Hypertrophy' : 'Strength',
           weeklyFocus: i < 4 ? 'High volume, moderate intensity' : 'Lower volume, high intensity',
           workoutDays: Array.from({ length: daysPerWeek }, (_, d) => ({
-            dayName: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][d],
+            dayName: `Day ${d + 1}`,
             focus: daysPerWeek === 3 ? ['Upper', 'Lower', 'Full Body'][d % 3] : ['Push', 'Pull', 'Legs', 'Upper', 'Lower'][d % 5],
             exercises: [
               {
