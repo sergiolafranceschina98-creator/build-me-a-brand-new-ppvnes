@@ -75,10 +75,21 @@ export function register(app: App, fastify: FastifyInstance) {
       app.logger.info({ clientId }, 'Client data retrieved, calling AI');
 
       try {
-        app.logger.info({ clientId }, 'Generating program for client');
+        app.logger.info({
+          clientId,
+          trainingFrequency: client.trainingFrequency,
+          goals: client.goals
+        }, 'Generating program for client');
 
         // Generate program structure using fallback (reliable and fast for tests)
         const programStructure = generateFallbackProgram(client);
+
+        app.logger.info({
+          clientId,
+          hasPhases: !!programStructure.phases,
+          phasesCount: programStructure.phases?.length || 0,
+          firstPhaseWeeks: programStructure.phases?.[0]?.weeks?.length || 0
+        }, 'Program structure generated');
 
         // Determine program name and split type based on AI output
         const phases = programStructure.phases || [];
@@ -88,18 +99,34 @@ export function register(app: App, fastify: FastifyInstance) {
         const programName = generateProgramName(client.name, client.goals, durationWeeks);
 
         // Save program to database
+        // Ensure programStructure is a plain object that can be serialized to JSONB
+        const structureForDb = JSON.parse(JSON.stringify(programStructure));
+
+        const programValues = {
+          clientId: clientId,
+          programName: programName,
+          durationWeeks: durationWeeks,
+          splitType: splitType,
+          programStructure: structureForDb,
+        };
+
+        app.logger.info({
+          programId: 'new',
+          structureStr: JSON.stringify(programStructure).substring(0, 100),
+          valueStr: JSON.stringify(programValues.programStructure).substring(0, 100)
+        }, 'Saving program structure');
+
         const [program] = await app.db
           .insert(schema.workoutPrograms)
-          .values({
-            clientId: clientId,
-            programName: programName,
-            durationWeeks: durationWeeks,
-            splitType: splitType,
-            programStructure: programStructure as any,
-          })
+          .values(programValues as any)
           .returning();
 
-        app.logger.info({ programId: program.id, clientId }, 'Program created and saved');
+        app.logger.info({
+          programId: program.id,
+          clientId,
+          structureSize: JSON.stringify(program.programStructure).length,
+          hasPhases: !!(program.programStructure as any)?.phases
+        }, 'Program created and saved');
 
         return reply.status(201).send({
           id: program.id,
@@ -238,7 +265,13 @@ export function register(app: App, fastify: FastifyInstance) {
       return reply.status(404).send({ error: 'Program not found' });
     }
 
-    app.logger.info({ programId }, 'Program fetched successfully');
+    app.logger.info({
+      programId,
+      structureType: typeof program.programStructure,
+      structureSize: JSON.stringify(program.programStructure).length,
+      hasPhases: !!(program.programStructure as any)?.phases
+    }, 'Program fetched successfully');
+
     return {
       id: program.id,
       client_id: program.clientId,
@@ -293,7 +326,9 @@ function generateProgramName(clientName: string, goals: string, weeks: number): 
 
 function generateFallbackProgram(client: any) {
   const weeks = 8;
-  const daysPerWeek = Math.min(client.trainingFrequency, 6);
+  // Ensure daysPerWeek is valid (2-6 range based on schema)
+  const trainingFreq = Math.max(2, Math.min(6, client.trainingFrequency || 4));
+  const daysPerWeek = trainingFreq;
 
   return {
     phases: [
