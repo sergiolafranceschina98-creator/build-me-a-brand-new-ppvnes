@@ -119,6 +119,20 @@ describe("API Integration Tests", () => {
       });
       await expectStatus(res, 404);
     });
+
+    test("Delete client with invalid UUID format", async () => {
+      const res = await api(`/api/clients/invalid-uuid`, {
+        method: "DELETE",
+      });
+      await expectStatus(res, 400);
+    });
+
+    test("Delete nonexistent client", async () => {
+      const res = await api(`/api/clients/00000000-0000-0000-0000-000000000000`, {
+        method: "DELETE",
+      });
+      await expectStatus(res, 404);
+    });
   });
 
   describe("Programs", () => {
@@ -197,15 +211,14 @@ describe("API Integration Tests", () => {
       await expectStatus(res, 400);
     });
 
-    test("Delete all clients", async () => {
-      const res = await api("/api/clients/all", {
+    test("Delete client (also deletes associated programs)", async () => {
+      const res = await api(`/api/clients/${clientId}`, {
         method: "DELETE",
       });
       await expectStatus(res, 200);
       const data = await res.json();
       expect(data.success).toBe(true);
-      expect(data.deletedCount).toBeDefined();
-      expect(typeof data.deletedCount).toBe("number");
+      expect(data.message).toBe("Client deleted successfully");
     });
   });
 });

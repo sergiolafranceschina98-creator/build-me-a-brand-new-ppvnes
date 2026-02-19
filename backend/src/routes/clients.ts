@@ -256,32 +256,52 @@ export function register(app: App, fastify: FastifyInstance) {
     };
   });
 
-  // Delete all clients
-  fastify.delete('/api/clients/all', {
+  // Delete a single client
+  fastify.delete<{ Params: { id: string } }>('/api/clients/:id', {
     schema: {
-      description: 'Delete all clients from the database',
+      description: 'Delete a client by ID (also deletes associated workout programs)',
       tags: ['clients'],
+      params: {
+        type: 'object',
+        required: ['id'],
+        properties: {
+          id: { type: 'string', format: 'uuid' },
+        },
+      },
       response: {
         200: {
           type: 'object',
           properties: {
             success: { type: 'boolean' },
-            deletedCount: { type: 'number' },
+            message: { type: 'string' },
+          },
+        },
+        404: {
+          type: 'object',
+          properties: {
+            error: { type: 'string' },
           },
         },
       },
     },
   }, async (request, reply) => {
-    app.logger.info('Deleting all clients');
+    const { id } = request.params;
+    app.logger.info({ clientId: id }, 'Deleting client');
 
-    const deletedClients = await app.db
+    const deletedClient = await app.db
       .delete(schema.clients)
+      .where(eq(schema.clients.id, id))
       .returning();
 
-    app.logger.info({ deletedCount: deletedClients.length }, 'All clients deleted successfully');
+    if (deletedClient.length === 0) {
+      app.logger.warn({ clientId: id }, 'Client not found for deletion');
+      return reply.status(404).send({ error: 'Client not found' });
+    }
+
+    app.logger.info({ clientId: id }, 'Client deleted successfully');
     return reply.status(200).send({
       success: true,
-      deletedCount: deletedClients.length,
+      message: 'Client deleted successfully',
     });
   });
 }
