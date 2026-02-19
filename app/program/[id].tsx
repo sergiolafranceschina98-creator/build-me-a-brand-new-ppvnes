@@ -48,7 +48,7 @@ interface ProgramDetails {
 
 export default function ProgramDetailScreen() {
   const colorScheme = useColorScheme();
-  const theme = colors[colorScheme ?? 'light'];
+  const theme = colors.dark;
   const { id } = useLocalSearchParams();
   const programId = Array.isArray(id) ? id[0] : id;
   const [program, setProgram] = useState<ProgramDetails | null>(null);
@@ -84,7 +84,7 @@ export default function ProgramDetailScreen() {
           options={{
             headerShown: true,
             title: 'Program Details',
-            headerStyle: { backgroundColor: theme.card },
+            headerStyle: { backgroundColor: theme.backgroundSecondary },
             headerTintColor: theme.text,
             headerShadowVisible: false,
             headerBackTitle: 'Back',
@@ -104,7 +104,7 @@ export default function ProgramDetailScreen() {
           options={{
             headerShown: true,
             title: 'Program Details',
-            headerStyle: { backgroundColor: theme.card },
+            headerStyle: { backgroundColor: theme.backgroundSecondary },
             headerTintColor: theme.text,
             headerShadowVisible: false,
             headerBackTitle: 'Back',
@@ -229,7 +229,7 @@ export default function ProgramDetailScreen() {
         options={{
           headerShown: true,
           title: program.program_name,
-          headerStyle: { backgroundColor: theme.card },
+          headerStyle: { backgroundColor: theme.backgroundSecondary },
           headerTintColor: theme.text,
           headerShadowVisible: false,
           headerBackTitle: 'Back',
@@ -243,8 +243,8 @@ export default function ProgramDetailScreen() {
         animationType="fade"
         onRequestClose={() => setErrorModal({ visible: false, message: '' })}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: theme.card }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>Error</Text>
             <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
               {errorModal.message}
@@ -474,7 +474,6 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,

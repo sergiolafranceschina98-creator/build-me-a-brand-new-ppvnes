@@ -84,7 +84,7 @@ interface WorkoutProgram {
 
 export default function ClientDetailScreen() {
   const colorScheme = useColorScheme();
-  const theme = colors[colorScheme ?? 'dark'];
+  const theme = colors.dark;
   const router = useRouter();
   const { id } = useLocalSearchParams();
   const clientId = Array.isArray(id) ? id[0] : id;

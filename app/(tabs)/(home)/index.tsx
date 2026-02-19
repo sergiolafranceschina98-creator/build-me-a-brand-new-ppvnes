@@ -66,7 +66,7 @@ interface Client {
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
-  const theme = colors[colorScheme ?? 'dark'];
+  const theme = colors.dark;
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);

@@ -41,7 +41,7 @@ async function apiPost<T>(path: string, body: unknown): Promise<T> {
 
 export default function CreateClientScreen() {
   const colorScheme = useColorScheme();
-  const theme = colors[colorScheme ?? 'light'];
+  const theme = colors.dark;
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [validationModal, setValidationModal] = useState<{ visible: boolean; message: string }>({
@@ -166,7 +166,7 @@ export default function CreateClientScreen() {
         options={{
           headerShown: true,
           title: 'New Client',
-          headerStyle: { backgroundColor: theme.card },
+          headerStyle: { backgroundColor: theme.backgroundSecondary },
           headerTintColor: theme.text,
           headerShadowVisible: false,
           headerBackTitle: 'Back',
@@ -180,8 +180,8 @@ export default function CreateClientScreen() {
         animationType="fade"
         onRequestClose={() => setValidationModal({ visible: false, message: '' })}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: theme.card }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>Missing Information</Text>
             <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
               {validationModal.message}
@@ -203,8 +203,8 @@ export default function CreateClientScreen() {
         animationType="fade"
         onRequestClose={() => setErrorModal({ visible: false, message: '' })}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: theme.card }]}>
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>Error</Text>
             <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
               {errorModal.message}
@@ -473,7 +473,6 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,

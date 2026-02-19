@@ -7,7 +7,7 @@ import { IconSymbol } from '@/components/IconSymbol';
 
 export default function AboutScreen() {
   const colorScheme = useColorScheme();
-  const theme = colors[colorScheme ?? 'light'];
+  const theme = colors.dark;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -15,7 +15,7 @@ export default function AboutScreen() {
         options={{
           headerShown: true,
           title: 'About',
-          headerStyle: { backgroundColor: theme.card },
+          headerStyle: { backgroundColor: theme.backgroundSecondary },
           headerTintColor: theme.text,
           headerShadowVisible: false,
           headerLargeTitle: true,
