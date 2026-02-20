@@ -1,9 +1,10 @@
+
 {
   "expo": {
-    "name": "Ai Workout Buider W",
-    "slug": "Ai Workout Buider W",
-    "scheme": "Ai Workout Buider W",
-    "version": "1.0.1",
+    "name": "AI Workout Builder",
+    "slug": "ai-workout-builder",
+    "scheme": "aiworkoutbuilder",
+    "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-jjc.png",
     "userInterfaceStyle": "automatic",
@@ -18,23 +19,23 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.aiworkoutbuilder.app",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./assets/images/app-icon-jjc.png",
         "backgroundColor": "#ffffff"
       },
       "package": "com.aiworkoutbuilder.app",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/app-icon-jjc.png"
     },
     "plugins": [
       "expo-router"
@@ -44,13 +45,12 @@
     },
     "extra": {
       "backendUrl": "https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev",
-      "resourceClasses": {
-        "ios": "m1-medium",
-        "android": "medium"
-      },
       "eas": {
         "projectId": "c59b1ee6-b1ce-467a-abc7-377810d1fa6c"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
     }
   }
 }

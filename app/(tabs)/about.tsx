@@ -2,67 +2,63 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, useColorScheme } from 'react-native';
 import { Stack } from 'expo-router';
-import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
+import { colors } from '@/styles/commonStyles';
 
 export default function AboutScreen() {
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? colors.dark : colors.light;
 
+  console.log('ℹ️ AboutScreen rendering');
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Stack.Screen
         options={{
-          headerShown: true,
-          title: 'About',
-          headerStyle: { backgroundColor: colorScheme === 'dark' ? colors.dark.backgroundSecondary : colors.light.background },
-          headerTintColor: theme.text,
-          headerShadowVisible: false,
+          headerShown: false,
         }}
       />
-
       <ScrollView
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <View style={[styles.iconContainer, { backgroundColor: theme.primary }]}>
+          <View style={[styles.iconContainer, { backgroundColor: theme.highlight }]}>
             <IconSymbol
-              ios_icon_name="sparkles"
-              android_material_icon_name="auto-awesome"
-              size={48}
-              color="#FFFFFF"
+              ios_icon_name="info.circle.fill"
+              android_material_icon_name="info"
+              size={64}
+              color={theme.primary}
             />
           </View>
-          <Text style={[styles.appName, { color: theme.text }]}>
+          <Text style={[styles.title, { color: theme.text }]}>
             AI Workout Builder
           </Text>
-          <Text style={[styles.tagline, { color: theme.textSecondary }]}>
-            For Personal Trainers
+          <Text style={[styles.version, { color: theme.textSecondary }]}>
+            Version 1.0.2
           </Text>
         </View>
 
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>
-            Core Promise
+        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            About This App
           </Text>
-          <Text style={[styles.cardText, { color: theme.textSecondary }]}>
+          <Text style={[styles.sectionText, { color: theme.textSecondary }]}>
             Create fully personalized, periodized workout programs for your clients in under 60 seconds.
           </Text>
         </View>
 
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>
+        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
             Features
           </Text>
           <View style={styles.featureItem}>
             <IconSymbol
               ios_icon_name="checkmark.circle.fill"
               android_material_icon_name="check-circle"
-              size={20}
-              color={theme.success}
-              style={styles.featureIcon}
+              size={24}
+              color={theme.primary}
             />
             <Text style={[styles.featureText, { color: theme.textSecondary }]}>
               AI-powered program generation
@@ -72,67 +68,43 @@ export default function AboutScreen() {
             <IconSymbol
               ios_icon_name="checkmark.circle.fill"
               android_material_icon_name="check-circle"
-              size={20}
-              color={theme.success}
-              style={styles.featureIcon}
+              size={24}
+              color={theme.primary}
             />
             <Text style={[styles.featureText, { color: theme.textSecondary }]}>
-              4-12 week periodized plans
+              Personalized workout plans
             </Text>
           </View>
           <View style={styles.featureItem}>
             <IconSymbol
               ios_icon_name="checkmark.circle.fill"
               android_material_icon_name="check-circle"
-              size={20}
-              color={theme.success}
-              style={styles.featureIcon}
+              size={24}
+              color={theme.primary}
             />
             <Text style={[styles.featureText, { color: theme.textSecondary }]}>
-              Progressive overload built-in
+              Progressive overload tracking
             </Text>
           </View>
           <View style={styles.featureItem}>
             <IconSymbol
               ios_icon_name="checkmark.circle.fill"
               android_material_icon_name="check-circle"
-              size={20}
-              color={theme.success}
-              style={styles.featureIcon}
+              size={24}
+              color={theme.primary}
             />
             <Text style={[styles.featureText, { color: theme.textSecondary }]}>
-              Injury-aware exercise selection
-            </Text>
-          </View>
-          <View style={styles.featureItem}>
-            <IconSymbol
-              ios_icon_name="checkmark.circle.fill"
-              android_material_icon_name="check-circle"
-              size={20}
-              color={theme.success}
-              style={styles.featureIcon}
-            />
-            <Text style={[styles.featureText, { color: theme.textSecondary }]}>
-              Equipment-based customization
+              Client management
             </Text>
           </View>
         </View>
 
-        <View style={[styles.card, { backgroundColor: theme.card }]}>
-          <Text style={[styles.cardTitle, { color: theme.text }]}>
-            Target Users
+        <View style={[styles.section, { backgroundColor: theme.card, borderColor: theme.border }]}>
+          <Text style={[styles.sectionTitle, { color: theme.text }]}>
+            For Personal Trainers
           </Text>
-          <Text style={[styles.cardText, { color: theme.textSecondary }]}>
-            - Personal trainers{'\n'}
-            - Online fitness coaches{'\n'}
-            - Small gym owners{'\n'}
-            - Hybrid (in-person + online) coaches
-          </Text>
-        </View>
-
-        <View style={styles.footer}>
-          <Text style={[styles.footerText, { color: theme.textSecondary }]}>
-            Version 1.0.1
+          <Text style={[styles.sectionText, { color: theme.textSecondary }]}>
+            Designed specifically for personal trainers, online fitness coaches, and gym owners who want to deliver professional, science-based workout programs to their clients.
           </Text>
         </View>
       </ScrollView>
@@ -148,66 +120,54 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 40,
+    paddingHorizontal: 24,
+    paddingTop: 60,
+    paddingBottom: 120,
   },
   header: {
     alignItems: 'center',
     marginBottom: 32,
   },
   iconContainer: {
-    width: 96,
-    height: 96,
-    borderRadius: 48,
+    width: 120,
+    height: 120,
+    borderRadius: 60,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 20,
   },
-  appName: {
+  title: {
     fontSize: 28,
     fontWeight: 'bold',
-    marginBottom: 4,
+    marginBottom: 8,
+    textAlign: 'center',
   },
-  tagline: {
-    fontSize: 16,
+  version: {
+    fontSize: 14,
   },
-  card: {
-    borderRadius: 16,
-    padding: 20,
+  section: {
+    borderRadius: 20,
+    padding: 24,
     marginBottom: 16,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    borderWidth: 1,
   },
-  cardTitle: {
-    fontSize: 18,
+  sectionTitle: {
+    fontSize: 20,
     fontWeight: 'bold',
     marginBottom: 12,
   },
-  cardText: {
-    fontSize: 14,
-    lineHeight: 22,
+  sectionText: {
+    fontSize: 16,
+    lineHeight: 24,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 12,
-  },
-  featureIcon: {
-    marginRight: 12,
+    gap: 12,
   },
   featureText: {
-    fontSize: 14,
+    fontSize: 16,
     flex: 1,
-  },
-  footer: {
-    alignItems: 'center',
-    marginTop: 16,
-  },
-  footerText: {
-    fontSize: 12,
   },
 });
