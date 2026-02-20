@@ -71,7 +71,7 @@ interface Client {
 }
 
 export default function HomeScreen() {
-  console.log('🏠 HomeScreen component rendering');
+  console.log('🏠 HomeScreen component rendering - START');
   
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? colors.dark : colors.light;
@@ -84,6 +84,8 @@ export default function HomeScreen() {
     visible: false,
     message: '',
   });
+
+  console.log('🏠 HomeScreen state:', { loading, connectionError, clientsCount: clients.length });
 
   useFocusEffect(
     React.useCallback(() => {

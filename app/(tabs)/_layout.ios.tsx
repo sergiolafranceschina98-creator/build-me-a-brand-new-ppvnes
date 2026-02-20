@@ -12,6 +12,8 @@ interface TabBarItem {
 }
 
 export default function TabLayout() {
+  console.log('📱 TabLayout (iOS) rendering - START');
+  
   const tabs: TabBarItem[] = [
     {
       route: '/(tabs)/(home)' as Href,
@@ -27,11 +29,14 @@ export default function TabLayout() {
     },
   ];
 
-  console.log('📱 TabLayout (iOS) rendering with tabs:', tabs);
+  console.log('📱 TabLayout (iOS) tabs configured:', tabs.length, 'tabs');
 
   return (
     <Tabs
-      tabBar={(props) => <FloatingTabBar {...props} tabs={tabs} />}
+      tabBar={(props) => {
+        console.log('📱 FloatingTabBar (iOS) rendering with props');
+        return <FloatingTabBar {...props} tabs={tabs} />;
+      }}
       screenOptions={{
         headerShown: false,
       }}
