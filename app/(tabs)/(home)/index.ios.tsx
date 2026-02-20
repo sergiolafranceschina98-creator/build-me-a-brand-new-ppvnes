@@ -12,13 +12,16 @@ import {
 } from 'react-native';
 import { Stack, useRouter, useFocusEffect } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
+import { ConnectionError } from '@/components/ConnectionError';
 import { colors } from '@/styles/commonStyles';
 import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const BACKEND_URL =
   (Constants.expoConfig?.extra?.backendUrl as string) ||
-  'https://ai-workout-builder-backend-production.up.railway.app';
+  'https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev';
+
+console.log('🔗 Home screen (iOS) initialized with backend URL:', BACKEND_URL);
 
 async function apiGet<T>(path: string): Promise<T> {
   const url = `${BACKEND_URL}${path}`;
@@ -59,6 +62,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [connectionError, setConnectionError] = useState(false);
   const [errorModal, setErrorModal] = useState<{ visible: boolean; message: string }>({
     visible: false,
     message: '',
@@ -74,16 +78,23 @@ export default function HomeScreen() {
   const loadClients = async () => {
     try {
       setLoading(true);
+      setConnectionError(false);
       console.log('Fetching clients from API');
       const data = await apiGet<Client[]>('/api/clients');
       console.log('Clients loaded:', data);
       setClients(data);
     } catch (error: any) {
       console.error('Error loading clients:', error);
-      setErrorModal({ 
-        visible: true, 
-        message: error?.message || 'Failed to load clients. Please try again.' 
-      });
+      
+      // Check if it's a network/connection error
+      if (error.message.includes('Network') || error.message.includes('Failed to fetch') || error.message.includes('offline')) {
+        setConnectionError(true);
+      } else {
+        setErrorModal({ 
+          visible: true, 
+          message: error?.message || 'Failed to load clients. Please try again.' 
+        });
+      }
     } finally {
       setLoading(false);
     }
@@ -98,6 +109,24 @@ export default function HomeScreen() {
     console.log('User tapped client:', clientId);
     router.push(`/client/${clientId}`);
   };
+
+  // Show connection error screen
+  if (connectionError && !loading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <Stack.Screen
+          options={{
+            headerShown: false,
+          }}
+        />
+        <ConnectionError
+          message="Unable to connect to the server. Please check your internet connection and try again."
+          onRetry={loadClients}
+          theme={theme}
+        />
+      </View>
+    );
+  }
 
   const emptyStateView = (
     <View style={styles.emptyState}>
