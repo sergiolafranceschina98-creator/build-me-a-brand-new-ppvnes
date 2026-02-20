@@ -6,9 +6,10 @@ import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, View, Text, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Prevent the splash screen from auto-hiding
 SplashScreen.preventAutoHideAsync().catch(() => {
@@ -20,46 +21,52 @@ export default function RootLayout() {
   
   const colorScheme = useColorScheme();
   
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
   useEffect(() => {
     console.log('🚀 RootLayout: Mounted');
     
-    // Hide splash screen after a short delay
+    // Hide splash screen immediately
     const timer = setTimeout(() => {
       console.log('✅ Hiding splash screen');
       SplashScreen.hideAsync().catch((err) => {
         console.log('⚠️ Error hiding splash:', err);
       });
-    }, 100);
+    }, 50);
     
     return () => clearTimeout(timer);
   }, []);
 
   useEffect(() => {
     if (fontsLoaded) {
-      console.log('✅ Fonts loaded');
+      console.log('✅ Fonts loaded successfully');
     }
-  }, [fontsLoaded]);
+    if (fontError) {
+      console.error('❌ Font loading error:', fontError);
+    }
+  }, [fontsLoaded, fontError]);
 
-  console.log('🎨 RootLayout: Rendering app structure');
+  // ALWAYS render - don't wait for fonts
+  console.log('🎨 RootLayout: Rendering app structure (fonts loaded:', fontsLoaded, ', error:', !!fontError, ')');
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <SafeAreaProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-            <Stack.Screen name="create-client" options={{ headerShown: false }} />
-            <Stack.Screen name="client/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="program/[id]" options={{ headerShown: false }} />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-      </SafeAreaProvider>
-    </GestureHandlerRootView>
+    <ErrorBoundary>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <SafeAreaProvider>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+              <Stack.Screen name="create-client" options={{ headerShown: false }} />
+              <Stack.Screen name="client/[id]" options={{ headerShown: false }} />
+              <Stack.Screen name="program/[id]" options={{ headerShown: false }} />
+              <Stack.Screen name="+not-found" />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+        </SafeAreaProvider>
+      </GestureHandlerRootView>
+    </ErrorBoundary>
   );
 }

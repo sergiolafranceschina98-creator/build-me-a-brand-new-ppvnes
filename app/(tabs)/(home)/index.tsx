@@ -19,9 +19,12 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const BACKEND_URL =
   (Constants.expoConfig?.extra?.backendUrl as string) ||
+  (Constants.manifest?.extra?.backendUrl as string) ||
   'https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev';
 
 console.log('🔗 Home screen backend URL:', BACKEND_URL);
+console.log('🔗 Constants.expoConfig:', Constants.expoConfig?.extra);
+console.log('🔗 Constants.manifest:', Constants.manifest?.extra);
 
 async function apiGet<T>(path: string): Promise<T> {
   const url = `${BACKEND_URL}${path}`;
