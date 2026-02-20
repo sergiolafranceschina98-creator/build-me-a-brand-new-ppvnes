@@ -1,8 +1,9 @@
+
 {
   "expo": {
-    "name": "Ai Workout Buider W",
-    "slug": "Ai Workout Buider W",
-    "scheme": "Ai Workout Buider W",
+    "name": "AI Workout Builder",
+    "slug": "ai-workout-builder",
+    "scheme": "aiworkoutbuilder",
     "version": "1.0.2",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-jjc.png",
@@ -18,7 +19,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.aiworkoutbuilder.app",
-      "buildNumber": "3",
+      "buildNumber": "4",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -29,7 +30,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.aiworkoutbuilder.app",
-      "versionCode": 3
+      "versionCode": 4
     },
     "web": {
       "bundler": "metro",

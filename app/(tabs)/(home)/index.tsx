@@ -13,7 +13,6 @@ import {
 } from 'react-native';
 import { Stack, useRouter, useFocusEffect } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
-import { ConnectionError } from '@/components/ConnectionError';
 import { colors } from '@/styles/commonStyles';
 import Constants from 'expo-constants';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -22,11 +21,11 @@ const BACKEND_URL =
   (Constants.expoConfig?.extra?.backendUrl as string) ||
   'https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev';
 
-console.log('🔗 Home screen initialized with backend URL:', BACKEND_URL);
+console.log('🔗 Home screen backend URL:', BACKEND_URL);
 
 async function apiGet<T>(path: string): Promise<T> {
   const url = `${BACKEND_URL}${path}`;
-  console.log(`[API] GET ${url}`);
+  console.log(`📡 GET ${url}`);
   
   try {
     const controller = new AbortController();
@@ -46,16 +45,17 @@ async function apiGet<T>(path: string): Promise<T> {
         const d = await response.json(); 
         msg = d?.error || d?.message || msg; 
       } catch (e) {
-        console.error('Error parsing response:', e);
+        console.error('❌ Error parsing response:', e);
       }
       throw new Error(msg);
     }
     const data = await response.json();
-    console.log(`[API] GET ${url} response:`, data);
+    console.log(`✅ GET ${url} success:`, data);
     return data as T;
   } catch (error: any) {
+    console.error(`❌ GET ${url} failed:`, error);
     if (error.name === 'AbortError') {
-      throw new Error('Request timeout - server is not responding');
+      throw new Error('Request timeout');
     }
     throw error;
   }
@@ -71,122 +71,92 @@ interface Client {
 }
 
 export default function HomeScreen() {
-  console.log('🏠 HomeScreen component rendering - START');
+  console.log('🏠 HomeScreen rendering');
   
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? colors.dark : colors.light;
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
-  const [connectionError, setConnectionError] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
-  const [errorModal, setErrorModal] = useState<{ visible: boolean; message: string }>({
-    visible: false,
-    message: '',
-  });
-
-  console.log('🏠 HomeScreen state:', { loading, connectionError, clientsCount: clients.length });
+  const [error, setError] = useState('');
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log('🎯 HomeScreen focused - fetching clients');
+      console.log('🎯 HomeScreen focused');
       loadClients();
     }, [])
   );
 
   const loadClients = async () => {
+    console.log('📥 Loading clients...');
     try {
       setLoading(true);
-      setConnectionError(false);
-      setErrorMessage('');
-      console.log('📡 Fetching clients from API');
+      setError('');
       const data = await apiGet<Client[]>('/api/clients');
-      console.log('✅ Clients loaded:', data);
+      console.log('✅ Clients loaded:', data.length);
       setClients(data);
-    } catch (error: any) {
-      console.error('❌ Error loading clients:', error);
-      
-      const errorMsg = error?.message || 'Unknown error';
-      
-      if (
-        errorMsg.includes('Network') || 
-        errorMsg.includes('Failed to fetch') || 
-        errorMsg.includes('offline') ||
-        errorMsg.includes('timeout') ||
-        errorMsg.includes('ECONNREFUSED') ||
-        errorMsg.includes('ERR_NETWORK')
-      ) {
-        setConnectionError(true);
-        setErrorMessage('Unable to connect to the server. Please check your internet connection.');
-      } else {
-        setErrorModal({ 
-          visible: true, 
-          message: errorMsg || 'Failed to load clients. Please try again.' 
-        });
-      }
+    } catch (err: any) {
+      console.error('❌ Load clients error:', err);
+      setError(err?.message || 'Failed to load clients');
     } finally {
       setLoading(false);
-      console.log('🏁 Loading complete');
     }
   };
 
   const handleCreateClient = () => {
-    console.log('➕ User tapped Create New Client button');
+    console.log('➕ Create client tapped');
     router.push('/create-client');
   };
 
   const handleClientPress = (clientId: string) => {
-    console.log('👤 User tapped client:', clientId);
+    console.log('👤 Client tapped:', clientId);
     router.push(`/client/${clientId}`);
   };
 
-  console.log('📊 Render state:', { loading, connectionError, clientsCount: clients.length });
+  const loadingView = (
+    <View style={styles.centerContainer}>
+      <ActivityIndicator size="large" color={theme.primary} />
+      <Text style={[styles.statusText, { color: theme.textSecondary }]}>
+        Loading clients...
+      </Text>
+    </View>
+  );
 
-  if (connectionError && !loading) {
-    console.log('🚫 Rendering connection error screen');
-    return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <Stack.Screen
-          options={{
-            headerShown: false,
-          }}
+  const errorView = (
+    <View style={styles.centerContainer}>
+      <View style={[styles.iconContainer, { backgroundColor: theme.highlight }]}>
+        <IconSymbol
+          ios_icon_name="exclamationmark.triangle.fill"
+          android_material_icon_name="error"
+          size={64}
+          color={theme.error}
         />
-        <View style={styles.errorContainer}>
-          <View style={[styles.errorIconContainer, { backgroundColor: theme.highlight }]}>
-            <IconSymbol
-              ios_icon_name="wifi.slash"
-              android_material_icon_name="wifi-off"
-              size={64}
-              color={theme.error}
-            />
-          </View>
-          <Text style={[styles.errorTitle, { color: theme.text }]}>
-            Connection Error
-          </Text>
-          <Text style={[styles.errorMessage, { color: theme.textSecondary }]}>
-            {errorMessage || 'Unable to connect to the server. Please check your internet connection and try again.'}
-          </Text>
-          <TouchableOpacity
-            style={[styles.retryButton, { backgroundColor: theme.primary }]}
-            onPress={loadClients}
-            activeOpacity={0.8}
-          >
-            <IconSymbol
-              ios_icon_name="arrow.clockwise"
-              android_material_icon_name="refresh"
-              size={20}
-              color="#FFFFFF"
-            />
-            <Text style={styles.retryButtonText}>Retry Connection</Text>
-          </TouchableOpacity>
-        </View>
       </View>
-    );
-  }
+      <Text style={[styles.errorTitle, { color: theme.text }]}>
+        Connection Error
+      </Text>
+      <Text style={[styles.errorMessage, { color: theme.textSecondary }]}>
+        {error}
+      </Text>
+      <TouchableOpacity
+        style={[styles.retryButton, { backgroundColor: theme.primary }]}
+        onPress={loadClients}
+        activeOpacity={0.8}
+      >
+        <IconSymbol
+          ios_icon_name="arrow.clockwise"
+          android_material_icon_name="refresh"
+          size={20}
+          color="#FFFFFF"
+        />
+        <Text style={styles.retryButtonText}>Retry</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
-  const emptyStateView = (
-    <View style={styles.emptyState}>
-      <View style={[styles.emptyIconContainer, { backgroundColor: theme.highlight }]}>
+  const emptyView = (
+    <View style={styles.centerContainer}>
+      <View style={[styles.iconContainer, { backgroundColor: theme.highlight }]}>
         <IconSymbol
           ios_icon_name="person.3.fill"
           android_material_icon_name="group"
@@ -198,12 +168,12 @@ export default function HomeScreen() {
         No Clients Yet
       </Text>
       <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
-        Create your first client profile to generate AI-powered workout programs in under 60 seconds
+        Create your first client to generate AI-powered workout programs
       </Text>
     </View>
   );
 
-  const clientsList = (
+  const clientsView = (
     <ScrollView
       style={styles.scrollView}
       contentContainerStyle={styles.scrollContent}
@@ -266,59 +236,31 @@ export default function HomeScreen() {
     </ScrollView>
   );
 
-  console.log('🎨 Rendering main UI');
+  let contentView;
+  if (loading) {
+    contentView = loadingView;
+  } else if (error) {
+    contentView = errorView;
+  } else if (clients.length === 0) {
+    contentView = emptyView;
+  } else {
+    contentView = clientsView;
+  }
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Stack.Screen
-        options={{
-          headerShown: false,
-        }}
-      />
-
-      <Modal
-        visible={errorModal.visible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setErrorModal({ visible: false, message: '' })}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalBox, { backgroundColor: colorScheme === 'dark' ? colors.dark.cardElevated : colors.light.card }]}>
-            <Text style={[styles.modalTitle, { color: theme.text }]}>Error</Text>
-            <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
-              {errorModal.message}
-            </Text>
-            <TouchableOpacity
-              style={[styles.modalButton, { backgroundColor: theme.error }]}
-              onPress={() => setErrorModal({ visible: false, message: '' })}
-            >
-              <Text style={styles.modalButtonText}>OK</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <Stack.Screen options={{ headerShown: false }} />
 
       <View style={[styles.header, Platform.OS === 'android' && styles.headerAndroid]}>
         <Text style={[styles.title, { color: theme.text }]}>
           Your Clients
         </Text>
         <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
-          Create personalized workout programs in under 60 seconds
+          Create personalized workout programs in 60 seconds
         </Text>
       </View>
 
-      {loading ? (
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={theme.primary} />
-          <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
-            Loading clients...
-          </Text>
-        </View>
-      ) : clients.length === 0 ? (
-        emptyStateView
-      ) : (
-        clientsList
-      )}
+      {contentView}
 
       <TouchableOpacity
         style={[styles.fabContainer, Platform.OS === 'android' && styles.fabContainerAndroid]}
@@ -365,22 +307,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     lineHeight: 24,
   },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-  },
-  errorContainer: {
+  centerContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 40,
   },
-  errorIconContainer: {
+  statusText: {
+    marginTop: 16,
+    fontSize: 16,
+  },
+  iconContainer: {
     width: 120,
     height: 120,
     borderRadius: 60,
@@ -413,20 +350,6 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     letterSpacing: 0.3,
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 40,
-  },
-  emptyIconContainer: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 28,
   },
   emptyTitle: {
     fontSize: 28,
@@ -529,44 +452,5 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 12,
     elevation: 10,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 32,
-    backgroundColor: 'rgba(0, 0, 0, 0.7)',
-  },
-  modalBox: {
-    borderRadius: 24,
-    padding: 28,
-    width: '100%',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 12,
-  },
-  modalTitle: {
-    fontSize: 22,
-    fontWeight: 'bold',
-    marginBottom: 14,
-    letterSpacing: -0.3,
-  },
-  modalMessage: {
-    fontSize: 16,
-    lineHeight: 24,
-    marginBottom: 24,
-  },
-  modalButton: {
-    borderRadius: 14,
-    paddingVertical: 16,
-    alignItems: 'center',
-  },
-  modalButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-    letterSpacing: 0.3,
   },
 });
