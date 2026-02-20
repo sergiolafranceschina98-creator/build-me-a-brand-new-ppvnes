@@ -1,12 +1,11 @@
 
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DarkTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
-import { useColorScheme, View, Text, ActivityIndicator } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -17,9 +16,7 @@ SplashScreen.preventAutoHideAsync().catch(() => {
 });
 
 export default function RootLayout() {
-  console.log('🚀 RootLayout: Initializing');
-  
-  const colorScheme = useColorScheme();
+  console.log('🚀 RootLayout: Initializing with DARK theme');
   
   const [fontsLoaded, fontError] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
@@ -49,13 +46,13 @@ export default function RootLayout() {
   }, [fontsLoaded, fontError]);
 
   // ALWAYS render - don't wait for fonts
-  console.log('🎨 RootLayout: Rendering app structure (fonts loaded:', fontsLoaded, ', error:', !!fontError, ')');
+  console.log('🎨 RootLayout: Rendering app structure with DARK theme (fonts loaded:', fontsLoaded, ', error:', !!fontError, ')');
 
   return (
     <ErrorBoundary>
       <GestureHandlerRootView style={{ flex: 1 }}>
         <SafeAreaProvider>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <ThemeProvider value={DarkTheme}>
             <Stack screenOptions={{ headerShown: false }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen name="create-client" options={{ headerShown: false }} />
@@ -63,7 +60,7 @@ export default function RootLayout() {
               <Stack.Screen name="program/[id]" options={{ headerShown: false }} />
               <Stack.Screen name="+not-found" />
             </Stack>
-            <StatusBar style="auto" />
+            <StatusBar style="light" />
           </ThemeProvider>
         </SafeAreaProvider>
       </GestureHandlerRootView>
