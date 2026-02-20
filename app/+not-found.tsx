@@ -2,7 +2,7 @@
 import { Link, Stack } from 'expo-router';
 import { View, Text, StyleSheet, useColorScheme } from 'react-native';
 import { colors } from '@/styles/commonStyles';
-import React from 'react';
+import { IconSymbol } from '@/components/IconSymbol';
 
 export default function NotFoundScreen() {
   const colorScheme = useColorScheme();
@@ -12,6 +12,14 @@ export default function NotFoundScreen() {
     <>
       <Stack.Screen options={{ title: 'Oops!' }} />
       <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <View style={[styles.iconContainer, { backgroundColor: theme.highlight }]}>
+          <IconSymbol
+            ios_icon_name="exclamationmark.triangle.fill"
+            android_material_icon_name="warning"
+            size={64}
+            color={theme.error}
+          />
+        </View>
         <Text style={[styles.title, { color: theme.text }]}>
           This screen doesn&apos;t exist.
         </Text>
@@ -32,10 +40,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     padding: 20,
   },
+  iconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 24,
+  },
   title: {
     fontSize: 20,
     fontWeight: 'bold',
-    marginBottom: 20,
+    marginBottom: 16,
   },
   link: {
     marginTop: 15,
