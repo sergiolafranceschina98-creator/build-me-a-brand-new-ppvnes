@@ -1,4 +1,4 @@
-# build-me-a-brand-new
+# Ai Workout Buider W
 
 This app was built using [Natively.dev](https://natively.dev) - a platform for creating mobile apps.
 
