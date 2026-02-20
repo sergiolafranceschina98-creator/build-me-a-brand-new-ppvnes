@@ -1,3 +1,4 @@
+
 {
   "expo": {
     "name": "AI Workout Builder",
@@ -47,9 +48,6 @@
       "eas": {
         "projectId": "c59b1ee6-b1ce-467a-abc7-377810d1fa6c"
       }
-    },
-    "runtimeVersion": {
-      "policy": "appVersion"
     }
   }
 }
