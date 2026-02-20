@@ -6,9 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   TouchableOpacity,
-  useColorScheme,
   ActivityIndicator,
-  Modal,
 } from 'react-native';
 import { Stack, useRouter, useFocusEffect } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
@@ -75,8 +73,7 @@ interface Client {
 export default function HomeScreen() {
   console.log('🏠 HomeScreen (iOS) rendering');
   
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? colors.dark : colors.light;
+  const theme = colors.dark;
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);

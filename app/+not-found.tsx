@@ -1,12 +1,11 @@
 
 import { Link, Stack } from 'expo-router';
-import { View, Text, StyleSheet, useColorScheme } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { colors } from '@/styles/commonStyles';
 import { IconSymbol } from '@/components/IconSymbol';
 
 export default function NotFoundScreen() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? colors.dark : colors.light;
+  const theme = colors.dark;
 
   return (
     <>

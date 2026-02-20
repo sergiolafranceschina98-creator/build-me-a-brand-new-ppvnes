@@ -1,13 +1,12 @@
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView, useColorScheme } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Stack } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
 import { colors } from '@/styles/commonStyles';
 
 export default function AboutScreen() {
-  const colorScheme = useColorScheme();
-  const theme = colorScheme === 'dark' ? colors.dark : colors.light;
+  const theme = colors.dark;
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
