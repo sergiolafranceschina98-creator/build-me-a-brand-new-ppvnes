@@ -6,7 +6,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { SystemBars } from "react-native-edge-to-edge";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { useColorScheme } from "react-native";
+import { useColorScheme, View, ActivityIndicator } from "react-native";
 import {
   DarkTheme,
   DefaultTheme,
@@ -18,25 +18,26 @@ import { WidgetProvider } from "@/contexts/WidgetContext";
 
 SplashScreen.preventAutoHideAsync();
 
-export const unstable_settings = {
-  initialRouteName: "(tabs)",
-};
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
-  const [loaded] = useFonts({
+  const [loaded, error] = useFonts({
     SpaceMono: require("../assets/fonts/SpaceMono-Regular.ttf"),
   });
 
   useEffect(() => {
+    if (error) {
+      console.error('Font loading error:', error);
+      // Hide splash screen even if fonts fail to load
+      SplashScreen.hideAsync();
+    }
+  }, [error]);
+
+  useEffect(() => {
     if (loaded) {
+      console.log('Fonts loaded successfully');
       SplashScreen.hideAsync();
     }
   }, [loaded]);
-
-  if (!loaded) {
-    return null;
-  }
 
   const CustomDefaultTheme: Theme = {
     ...DefaultTheme,
@@ -62,6 +63,15 @@ export default function RootLayout() {
       notification: "rgb(255, 69, 58)",
     },
   };
+
+  // Show a loading indicator instead of returning null
+  if (!loaded && !error) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colorScheme === 'dark' ? '#0A0A0F' : '#F8F9FA' }}>
+        <ActivityIndicator size="large" color={colorScheme === 'dark' ? '#FF6B35' : '#007AFF'} />
+      </View>
+    );
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>

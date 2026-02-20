@@ -27,27 +27,29 @@ export default function TabLayout() {
     },
   ];
 
+  console.log('TabLayout rendering with tabs:', tabs);
+
   return (
-    <>
-      <Tabs
-        tabBar={(props) => <FloatingTabBar {...props} tabs={tabs} />}
-        screenOptions={{
+    <Tabs
+      tabBar={(props) => <FloatingTabBar {...props} tabs={tabs} />}
+      screenOptions={{
+        headerShown: false,
+      }}
+    >
+      <Tabs.Screen
+        name="(home)"
+        options={{
+          title: 'Home',
           headerShown: false,
         }}
-      >
-        <Tabs.Screen
-          name="(home)"
-          options={{
-            title: 'Home',
-          }}
-        />
-        <Tabs.Screen
-          name="about"
-          options={{
-            title: 'About',
-          }}
-        />
-      </Tabs>
-    </>
+      />
+      <Tabs.Screen
+        name="about"
+        options={{
+          title: 'About',
+          headerShown: false,
+        }}
+      />
+    </Tabs>
   );
 }

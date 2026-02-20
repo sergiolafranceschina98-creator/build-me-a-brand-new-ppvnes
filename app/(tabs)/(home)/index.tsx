@@ -19,7 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 const BACKEND_URL =
   (Constants.expoConfig?.extra?.backendUrl as string) ||
-  'https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev';
+  'https://ai-workout-builder-backend-production.up.railway.app';
 
 async function apiGet<T>(path: string): Promise<T> {
   const url = `${BACKEND_URL}${path}`;
@@ -30,7 +30,12 @@ async function apiGet<T>(path: string): Promise<T> {
   });
   if (!response.ok) {
     let msg = `HTTP ${response.status}`;
-    try { const d = await response.json(); msg = d?.error || d?.message || msg; } catch {}
+    try { 
+      const d = await response.json(); 
+      msg = d?.error || d?.message || msg; 
+    } catch (e) {
+      console.error('Error parsing response:', e);
+    }
     throw new Error(msg);
   }
   const data = await response.json();
@@ -48,6 +53,8 @@ interface Client {
 }
 
 export default function HomeScreen() {
+  console.log('HomeScreen rendering');
+  
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? colors.dark : colors.light;
   const router = useRouter();
@@ -70,10 +77,14 @@ export default function HomeScreen() {
       setLoading(true);
       console.log('Fetching clients from API');
       const data = await apiGet<Client[]>('/api/clients');
+      console.log('Clients loaded:', data);
       setClients(data);
     } catch (error: any) {
       console.error('Error loading clients:', error);
-      setErrorModal({ visible: true, message: error?.message || 'Failed to load clients. Please try again.' });
+      setErrorModal({ 
+        visible: true, 
+        message: error?.message || 'Failed to load clients. Please try again.' 
+      });
     } finally {
       setLoading(false);
     }
@@ -114,13 +125,13 @@ export default function HomeScreen() {
       contentContainerStyle={styles.scrollContent}
       showsVerticalScrollIndicator={false}
     >
-      {clients.map((client) => {
+      {clients.map((client, index) => {
         const goalText = client.goals;
         const frequencyText = `${client.training_frequency}x/week`;
         
         return (
           <TouchableOpacity
-            key={client.id}
+            key={client.id || `client-${index}`}
             style={[styles.clientCard, { backgroundColor: theme.card, borderColor: theme.border }]}
             onPress={() => handleClientPress(client.id)}
             activeOpacity={0.8}
@@ -214,6 +225,9 @@ export default function HomeScreen() {
       {loading ? (
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={theme.primary} />
+          <Text style={[styles.loadingText, { color: theme.textSecondary }]}>
+            Loading clients...
+          </Text>
         </View>
       ) : clients.length === 0 ? (
         emptyStateView
@@ -270,6 +284,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  loadingText: {
+    marginTop: 16,
+    fontSize: 16,
   },
   emptyState: {
     flex: 1,
