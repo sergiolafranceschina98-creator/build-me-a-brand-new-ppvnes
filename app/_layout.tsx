@@ -4,9 +4,9 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
-import { useColorScheme, View, ActivityIndicator, Text } from 'react-native';
+import { useColorScheme, View, ActivityIndicator, Text, StyleSheet } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Constants from 'expo-constants';
@@ -19,6 +19,7 @@ export default function RootLayout() {
   const [loaded, error] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
+  const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
     // Log backend URL on app start for debugging
@@ -30,6 +31,7 @@ export default function RootLayout() {
     if (error) {
       console.error('Font loading error:', error);
       SplashScreen.hideAsync();
+      setIsReady(true);
     }
   }, [error]);
 
@@ -37,14 +39,31 @@ export default function RootLayout() {
     if (loaded) {
       console.log('✅ Fonts loaded successfully');
       SplashScreen.hideAsync();
+      // Small delay to ensure everything is ready
+      setTimeout(() => {
+        setIsReady(true);
+      }, 100);
     }
   }, [loaded]);
 
-  if (!loaded && !error) {
+  // Fallback timeout - if fonts don't load within 5 seconds, show the app anyway
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (!isReady) {
+        console.warn('⚠️ Font loading timeout - proceeding anyway');
+        SplashScreen.hideAsync();
+        setIsReady(true);
+      }
+    }, 5000);
+
+    return () => clearTimeout(timeout);
+  }, [isReady]);
+
+  if (!isReady) {
     return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#000' }}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#FF6B35" />
-        <Text style={{ color: '#FFF', marginTop: 16, fontSize: 14 }}>Loading...</Text>
+        <Text style={styles.loadingText}>Loading AI Workout Builder...</Text>
       </View>
     );
   }
@@ -66,3 +85,18 @@ export default function RootLayout() {
     </GestureHandlerRootView>
   );
 }
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#000',
+  },
+  loadingText: {
+    color: '#FFF',
+    marginTop: 16,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+});

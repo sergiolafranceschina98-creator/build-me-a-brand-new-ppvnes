@@ -26,23 +26,38 @@ console.log('🔗 Home screen (iOS) initialized with backend URL:', BACKEND_URL)
 async function apiGet<T>(path: string): Promise<T> {
   const url = `${BACKEND_URL}${path}`;
   console.log(`[API] GET ${url}`);
-  const response = await fetch(url, {
-    method: 'GET',
-    headers: { 'Content-Type': 'application/json' },
-  });
-  if (!response.ok) {
-    let msg = `HTTP ${response.status}`;
-    try { 
-      const d = await response.json(); 
-      msg = d?.error || d?.message || msg; 
-    } catch (e) {
-      console.error('Error parsing response:', e);
+  
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      let msg = `HTTP ${response.status}`;
+      try { 
+        const d = await response.json(); 
+        msg = d?.error || d?.message || msg; 
+      } catch (e) {
+        console.error('Error parsing response:', e);
+      }
+      throw new Error(msg);
     }
-    throw new Error(msg);
+    const data = await response.json();
+    console.log(`[API] GET ${url} response:`, data);
+    return data as T;
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout - server is not responding');
+    }
+    throw error;
   }
-  const data = await response.json();
-  console.log(`[API] GET ${url} response:`, data);
-  return data as T;
 }
 
 interface Client {
@@ -63,6 +78,7 @@ export default function HomeScreen() {
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const [connectionError, setConnectionError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [errorModal, setErrorModal] = useState<{ visible: boolean; message: string }>({
     visible: false,
     message: '',
@@ -79,6 +95,7 @@ export default function HomeScreen() {
     try {
       setLoading(true);
       setConnectionError(false);
+      setErrorMessage('');
       console.log('Fetching clients from API');
       const data = await apiGet<Client[]>('/api/clients');
       console.log('Clients loaded:', data);
@@ -86,13 +103,23 @@ export default function HomeScreen() {
     } catch (error: any) {
       console.error('Error loading clients:', error);
       
+      const errorMsg = error?.message || 'Unknown error';
+      
       // Check if it's a network/connection error
-      if (error.message.includes('Network') || error.message.includes('Failed to fetch') || error.message.includes('offline')) {
+      if (
+        errorMsg.includes('Network') || 
+        errorMsg.includes('Failed to fetch') || 
+        errorMsg.includes('offline') ||
+        errorMsg.includes('timeout') ||
+        errorMsg.includes('ECONNREFUSED') ||
+        errorMsg.includes('ERR_NETWORK')
+      ) {
         setConnectionError(true);
+        setErrorMessage('Unable to connect to the server. Please check your internet connection.');
       } else {
         setErrorModal({ 
           visible: true, 
-          message: error?.message || 'Failed to load clients. Please try again.' 
+          message: errorMsg || 'Failed to load clients. Please try again.' 
         });
       }
     } finally {
@@ -119,11 +146,35 @@ export default function HomeScreen() {
             headerShown: false,
           }}
         />
-        <ConnectionError
-          message="Unable to connect to the server. Please check your internet connection and try again."
-          onRetry={loadClients}
-          theme={theme}
-        />
+        <View style={styles.errorContainer}>
+          <View style={[styles.errorIconContainer, { backgroundColor: theme.highlight }]}>
+            <IconSymbol
+              ios_icon_name="wifi.slash"
+              android_material_icon_name="wifi-off"
+              size={64}
+              color={theme.error}
+            />
+          </View>
+          <Text style={[styles.errorTitle, { color: theme.text }]}>
+            Connection Error
+          </Text>
+          <Text style={[styles.errorMessage, { color: theme.textSecondary }]}>
+            {errorMessage || 'Unable to connect to the server. Please check your internet connection and try again.'}
+          </Text>
+          <TouchableOpacity
+            style={[styles.retryButton, { backgroundColor: theme.primary }]}
+            onPress={loadClients}
+            activeOpacity={0.8}
+          >
+            <IconSymbol
+              ios_icon_name="arrow.clockwise"
+              android_material_icon_name="refresh"
+              size={20}
+              color="#FFFFFF"
+            />
+            <Text style={styles.retryButtonText}>Retry Connection</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     );
   }
@@ -292,7 +343,7 @@ const styles = StyleSheet.create({
   },
   header: {
     paddingHorizontal: 24,
-    paddingTop: 24,
+    paddingTop: 60,
     paddingBottom: 20,
   },
   title: {
@@ -313,6 +364,46 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: 16,
     fontSize: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 40,
+  },
+  errorIconContainer: {
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  errorTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    fontSize: 16,
+    textAlign: 'center',
+    lineHeight: 24,
+    marginBottom: 32,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+    paddingVertical: 16,
+    borderRadius: 16,
+    gap: 10,
+  },
+  retryButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
   emptyState: {
     flex: 1,
