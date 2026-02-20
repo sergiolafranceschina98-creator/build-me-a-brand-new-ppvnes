@@ -21,8 +21,6 @@ const BACKEND_URL =
   'https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev';
 
 console.log('🔗 Home screen backend URL:', BACKEND_URL);
-console.log('🔗 Constants.expoConfig:', Constants.expoConfig?.extra);
-console.log('🔗 Constants.manifest:', Constants.manifest?.extra);
 
 async function apiGet<T>(path: string): Promise<T> {
   const url = `${BACKEND_URL}${path}`;
@@ -72,8 +70,9 @@ interface Client {
 }
 
 export default function HomeScreen() {
-  console.log('🏠 HomeScreen rendering');
+  console.log('🏠 HomeScreen rendering - DARK THEME ACTIVE');
   
+  // CRITICAL: Force dark theme - no dynamic switching
   const theme = colors.dark;
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
@@ -82,7 +81,7 @@ export default function HomeScreen() {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log('🎯 HomeScreen focused');
+      console.log('🎯 HomeScreen focused - Loading clients');
       loadClients();
     }, [])
   );
