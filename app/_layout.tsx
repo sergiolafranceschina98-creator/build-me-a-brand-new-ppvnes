@@ -46,14 +46,9 @@ export default function RootLayout() {
     }
   }, [loaded]);
 
-  // Don't block rendering - show app immediately
-  // Fonts will load in background and app will work with system fonts as fallback
-  if (!loaded && !error) {
-    // Still loading fonts, but don't block
-    return null;
-  }
-
-  console.log('🎨 RootLayout rendering');
+  // CRITICAL FIX: Always render the app, don't block on font loading
+  // The app will use system fonts as fallback until custom fonts load
+  console.log('🎨 RootLayout rendering - loaded:', loaded, 'error:', error);
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
