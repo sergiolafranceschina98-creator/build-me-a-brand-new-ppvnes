@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Platform,
+  Dimensions,
 } from 'react-native';
 import { Stack, useRouter, useFocusEffect } from 'expo-router';
 import { IconSymbol } from '@/components/IconSymbol';
@@ -21,6 +22,10 @@ const BACKEND_URL =
   'https://nkn5cez75xgu5asaygkf9t536w43m4z9.app.specular.dev';
 
 console.log('🔗 Home screen backend URL:', BACKEND_URL);
+
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
+const IS_TABLET = SCREEN_WIDTH >= 768;
+const MAX_CONTENT_WIDTH = 800;
 
 async function apiGet<T>(path: string): Promise<T> {
   const url = `${BACKEND_URL}${path}`;
@@ -70,7 +75,7 @@ interface Client {
 }
 
 export default function HomeScreen() {
-  console.log('🏠 HomeScreen rendering - FORCING BLACK THEME');
+  console.log('🏠 HomeScreen rendering - iPad optimized, DARK THEME');
   
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
@@ -183,63 +188,68 @@ export default function HomeScreen() {
   const clientsView = (
     <ScrollView
       style={styles.scrollView}
-      contentContainerStyle={styles.scrollContent}
+      contentContainerStyle={[
+        styles.scrollContent,
+        IS_TABLET && styles.scrollContentTablet,
+      ]}
       showsVerticalScrollIndicator={false}
     >
-      {clients.map((client, index) => {
-        const goalText = client.goals;
-        const frequencyText = `${client.training_frequency}x/week`;
-        
-        return (
-          <TouchableOpacity
-            key={client.id || `client-${index}`}
-            style={[styles.clientCard, { backgroundColor: cardColor, borderColor: borderColor }]}
-            onPress={() => handleClientPress(client.id)}
-            activeOpacity={0.8}
-          >
-            <View style={styles.clientHeader}>
-              <LinearGradient
-                colors={[primaryColor, secondaryColor]}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.avatar}
-              >
-                <Text style={styles.avatarText}>
-                  {client.name.charAt(0).toUpperCase()}
-                </Text>
-              </LinearGradient>
-              <View style={styles.clientInfo}>
-                <Text style={[styles.clientName, { color: textColor }]}>
-                  {client.name}
-                </Text>
-                <Text style={[styles.clientMeta, { color: textSecondaryColor }]}>
-                  {client.age} years old
-                </Text>
+      <View style={[IS_TABLET && styles.contentWrapper]}>
+        {clients.map((client, index) => {
+          const goalText = client.goals;
+          const frequencyText = `${client.training_frequency}x/week`;
+          
+          return (
+            <TouchableOpacity
+              key={client.id || `client-${index}`}
+              style={[styles.clientCard, { backgroundColor: cardColor, borderColor: borderColor }]}
+              onPress={() => handleClientPress(client.id)}
+              activeOpacity={0.8}
+            >
+              <View style={styles.clientHeader}>
+                <LinearGradient
+                  colors={[primaryColor, secondaryColor]}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 1 }}
+                  style={styles.avatar}
+                >
+                  <Text style={styles.avatarText}>
+                    {client.name.charAt(0).toUpperCase()}
+                  </Text>
+                </LinearGradient>
+                <View style={styles.clientInfo}>
+                  <Text style={[styles.clientName, { color: textColor }]}>
+                    {client.name}
+                  </Text>
+                  <Text style={[styles.clientMeta, { color: textSecondaryColor }]}>
+                    {client.age} years old
+                  </Text>
+                </View>
+                <View style={[styles.chevronContainer, { backgroundColor: highlightColor }]}>
+                  <IconSymbol
+                    ios_icon_name="chevron.right"
+                    android_material_icon_name="arrow-forward"
+                    size={18}
+                    color={primaryColor}
+                  />
+                </View>
               </View>
-              <View style={[styles.chevronContainer, { backgroundColor: highlightColor }]}>
-                <IconSymbol
-                  ios_icon_name="chevron.right"
-                  android_material_icon_name="arrow-forward"
-                  size={18}
-                  color={primaryColor}
-                />
+              <View style={styles.clientDetails}>
+                <View style={[styles.badge, { backgroundColor: highlightColor, borderColor: primaryColor }]}>
+                  <Text style={[styles.badgeText, { color: primaryColor }]}>
+                    {goalText}
+                  </Text>
+                </View>
+                <View style={[styles.badge, { backgroundColor: highlightColor, borderColor: primaryColor }]}>
+                  <Text style={[styles.badgeText, { color: primaryColor }]}>
+                    {frequencyText}
+                  </Text>
+                </View>
               </View>
-            </View>
-            <View style={styles.clientDetails}>
-              <View style={[styles.badge, { backgroundColor: highlightColor, borderColor: primaryColor }]}>
-                <Text style={[styles.badgeText, { color: primaryColor }]}>
-                  {goalText}
-                </Text>
-              </View>
-              <View style={[styles.badge, { backgroundColor: highlightColor, borderColor: primaryColor }]}>
-                <Text style={[styles.badgeText, { color: primaryColor }]}>
-                  {frequencyText}
-                </Text>
-              </View>
-            </View>
-          </TouchableOpacity>
-        );
-      })}
+            </TouchableOpacity>
+          );
+        })}
+      </View>
     </ScrollView>
   );
 
@@ -258,19 +268,29 @@ export default function HomeScreen() {
     <View style={[styles.container, { backgroundColor: bgColor }]}>
       <Stack.Screen options={{ headerShown: false }} />
 
-      <View style={[styles.header, Platform.OS === 'android' && styles.headerAndroid]}>
-        <Text style={[styles.title, { color: textColor }]}>
-          Your Clients
-        </Text>
-        <Text style={[styles.subtitle, { color: textSecondaryColor }]}>
-          Create personalized workout programs in 60 seconds
-        </Text>
+      <View style={[
+        styles.header,
+        Platform.OS === 'android' && styles.headerAndroid,
+        IS_TABLET && styles.headerTablet,
+      ]}>
+        <View style={[IS_TABLET && styles.contentWrapper]}>
+          <Text style={[styles.title, { color: textColor }, IS_TABLET && styles.titleTablet]}>
+            Your Clients
+          </Text>
+          <Text style={[styles.subtitle, { color: textSecondaryColor }]}>
+            Create personalized workout programs in 60 seconds
+          </Text>
+        </View>
       </View>
 
       {contentView}
 
       <TouchableOpacity
-        style={[styles.fabContainer, Platform.OS === 'android' && styles.fabContainerAndroid]}
+        style={[
+          styles.fabContainer,
+          Platform.OS === 'android' && styles.fabContainerAndroid,
+          IS_TABLET && styles.fabContainerTablet,
+        ]}
         onPress={handleCreateClient}
         activeOpacity={0.9}
       >
@@ -304,11 +324,26 @@ const styles = StyleSheet.create({
   headerAndroid: {
     paddingTop: 48,
   },
+  headerTablet: {
+    paddingHorizontal: 40,
+    paddingTop: 60,
+    paddingBottom: 32,
+    alignItems: 'center',
+  },
+  contentWrapper: {
+    width: '100%',
+    maxWidth: MAX_CONTENT_WIDTH,
+    alignSelf: 'center',
+  },
   title: {
     fontSize: 36,
     fontWeight: 'bold',
     marginBottom: 8,
     letterSpacing: -0.5,
+  },
+  titleTablet: {
+    fontSize: 48,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
@@ -375,6 +410,10 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 24,
     paddingBottom: 120,
+  },
+  scrollContentTablet: {
+    paddingHorizontal: 40,
+    alignItems: 'center',
   },
   clientCard: {
     borderRadius: 20,
@@ -447,6 +486,9 @@ const styles = StyleSheet.create({
   },
   fabContainerAndroid: {
     bottom: 24,
+  },
+  fabContainerTablet: {
+    right: Math.max(24, (SCREEN_WIDTH - MAX_CONTENT_WIDTH) / 2 + 24),
   },
   fab: {
     width: 68,
