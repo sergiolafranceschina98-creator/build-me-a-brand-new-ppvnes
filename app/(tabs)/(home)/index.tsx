@@ -30,7 +30,7 @@ async function apiGet<T>(path: string): Promise<T> {
   
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     
     const response = await fetch(url, {
       method: 'GET',
@@ -71,7 +71,7 @@ interface Client {
 }
 
 export default function HomeScreen() {
-  console.log('HomeScreen rendering');
+  console.log('🏠 HomeScreen component rendering');
   
   const colorScheme = useColorScheme();
   const theme = colorScheme === 'dark' ? colors.dark : colors.light;
@@ -87,7 +87,7 @@ export default function HomeScreen() {
 
   useFocusEffect(
     React.useCallback(() => {
-      console.log('HomeScreen focused - fetching clients');
+      console.log('🎯 HomeScreen focused - fetching clients');
       loadClients();
     }, [])
   );
@@ -97,16 +97,15 @@ export default function HomeScreen() {
       setLoading(true);
       setConnectionError(false);
       setErrorMessage('');
-      console.log('Fetching clients from API');
+      console.log('📡 Fetching clients from API');
       const data = await apiGet<Client[]>('/api/clients');
-      console.log('Clients loaded:', data);
+      console.log('✅ Clients loaded:', data);
       setClients(data);
     } catch (error: any) {
-      console.error('Error loading clients:', error);
+      console.error('❌ Error loading clients:', error);
       
       const errorMsg = error?.message || 'Unknown error';
       
-      // Check if it's a network/connection error
       if (
         errorMsg.includes('Network') || 
         errorMsg.includes('Failed to fetch') || 
@@ -125,21 +124,24 @@ export default function HomeScreen() {
       }
     } finally {
       setLoading(false);
+      console.log('🏁 Loading complete');
     }
   };
 
   const handleCreateClient = () => {
-    console.log('User tapped Create New Client button');
+    console.log('➕ User tapped Create New Client button');
     router.push('/create-client');
   };
 
   const handleClientPress = (clientId: string) => {
-    console.log('User tapped client:', clientId);
+    console.log('👤 User tapped client:', clientId);
     router.push(`/client/${clientId}`);
   };
 
-  // Show connection error screen
+  console.log('📊 Render state:', { loading, connectionError, clientsCount: clients.length });
+
   if (connectionError && !loading) {
+    console.log('🚫 Rendering connection error screen');
     return (
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <Stack.Screen
@@ -262,6 +264,8 @@ export default function HomeScreen() {
     </ScrollView>
   );
 
+  console.log('🎨 Rendering main UI');
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <Stack.Screen
@@ -270,7 +274,6 @@ export default function HomeScreen() {
         }}
       />
 
-      {/* Error Modal */}
       <Modal
         visible={errorModal.visible}
         transparent
