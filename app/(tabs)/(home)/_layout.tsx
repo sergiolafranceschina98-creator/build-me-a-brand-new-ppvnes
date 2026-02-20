@@ -1,8 +1,9 @@
 
 import { Stack } from 'expo-router';
+import React from 'react';
 
 export default function HomeLayout() {
-  console.log('🏠 HomeLayout rendering');
+  console.log('🏠 HomeLayout: Rendering');
   
   return (
     <Stack
@@ -10,7 +11,12 @@ export default function HomeLayout() {
         headerShown: false,
       }}
     >
-      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen
+        name="index"
+        options={{
+          headerShown: false,
+        }}
+      />
     </Stack>
   );
 }

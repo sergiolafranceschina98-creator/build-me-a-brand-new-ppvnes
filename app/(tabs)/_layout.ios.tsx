@@ -12,7 +12,7 @@ interface TabBarItem {
 }
 
 export default function TabLayout() {
-  console.log('📱 TabLayout (iOS) rendering - START');
+  console.log('📱 TabLayout (iOS): Component rendering - START');
   
   const tabs: TabBarItem[] = [
     {
@@ -29,12 +29,13 @@ export default function TabLayout() {
     },
   ];
 
-  console.log('📱 TabLayout (iOS) tabs configured:', tabs.length, 'tabs');
+  console.log('📱 TabLayout (iOS): Configured', tabs.length, 'tabs');
+  console.log('📱 TabLayout (iOS): Tab routes:', tabs.map(t => t.route));
 
   return (
     <Tabs
       tabBar={(props) => {
-        console.log('📱 FloatingTabBar (iOS) rendering with props');
+        console.log('📱 TabLayout (iOS): FloatingTabBar rendering');
         return <FloatingTabBar {...props} tabs={tabs} />;
       }}
       screenOptions={{
