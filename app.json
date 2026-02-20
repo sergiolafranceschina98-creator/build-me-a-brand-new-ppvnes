@@ -1,9 +1,8 @@
-
 {
   "expo": {
-    "name": "AI Workout Builder",
-    "slug": "ai-workout-builder",
-    "scheme": "aiworkoutbuilder",
+    "name": "build-me-a-brand-new",
+    "slug": "build-me-a-brand-new",
+    "scheme": "build-me-a-brand-new",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/app-icon-jjc.png",

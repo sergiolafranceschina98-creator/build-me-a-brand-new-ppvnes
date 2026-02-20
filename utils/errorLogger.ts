@@ -364,5 +364,3 @@ export const setupErrorLogging = () => {
 if (__DEV__) {
   setupErrorLogging();
 }
-
-
