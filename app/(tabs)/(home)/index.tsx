@@ -49,7 +49,7 @@ interface Client {
 
 export default function HomeScreen() {
   const colorScheme = useColorScheme();
-  const theme = colors.dark;
+  const theme = colorScheme === 'dark' ? colors.dark : colors.light;
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -173,6 +173,12 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
+      <Stack.Screen
+        options={{
+          headerShown: false,
+        }}
+      />
+
       {/* Error Modal */}
       <Modal
         visible={errorModal.visible}
@@ -180,8 +186,8 @@ export default function HomeScreen() {
         animationType="fade"
         onRequestClose={() => setErrorModal({ visible: false, message: '' })}
       >
-        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
-          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalBox, { backgroundColor: colorScheme === 'dark' ? colors.dark.cardElevated : colors.light.card }]}>
             <Text style={[styles.modalTitle, { color: theme.text }]}>Error</Text>
             <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
               {errorModal.message}
@@ -196,7 +202,7 @@ export default function HomeScreen() {
         </View>
       </Modal>
 
-      <View style={styles.header}>
+      <View style={[styles.header, Platform.OS === 'android' && styles.headerAndroid]}>
         <Text style={[styles.title, { color: theme.text }]}>
           Your Clients
         </Text>
@@ -246,6 +252,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 24,
     paddingBottom: 20,
+  },
+  headerAndroid: {
+    paddingTop: 48,
   },
   title: {
     fontSize: 36,
@@ -383,12 +392,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     paddingHorizontal: 32,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
   },
   modalBox: {
     borderRadius: 24,
     padding: 28,
     width: '100%',
-    borderWidth: 1,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 8 },
     shadowOpacity: 0.4,
