@@ -52,6 +52,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
+  const [errorModal, setErrorModal] = useState<{ visible: boolean; message: string }>({
+    visible: false,
+    message: '',
+  });
 
   useFocusEffect(
     React.useCallback(() => {
@@ -68,6 +72,7 @@ export default function HomeScreen() {
       setClients(data);
     } catch (error: any) {
       console.error('Error loading clients:', error);
+      setErrorModal({ visible: true, message: error?.message || 'Failed to load clients. Please try again.' });
     } finally {
       setLoading(false);
     }
@@ -167,17 +172,28 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'AI Workout Builder',
-          headerStyle: { backgroundColor: theme.backgroundSecondary },
-          headerTintColor: theme.text,
-          headerShadowVisible: false,
-          headerBackVisible: false,
-          headerLeft: () => null,
-        }}
-      />
+      {/* Error Modal */}
+      <Modal
+        visible={errorModal.visible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setErrorModal({ visible: false, message: '' })}
+      >
+        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+          <View style={[styles.modalBox, { backgroundColor: theme.cardElevated, borderColor: theme.borderLight }]}>
+            <Text style={[styles.modalTitle, { color: theme.text }]}>Error</Text>
+            <Text style={[styles.modalMessage, { color: theme.textSecondary }]}>
+              {errorModal.message}
+            </Text>
+            <TouchableOpacity
+              style={[styles.modalButton, { backgroundColor: theme.error }]}
+              onPress={() => setErrorModal({ visible: false, message: '' })}
+            >
+              <Text style={styles.modalButtonText}>OK</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       <View style={styles.header}>
         <Text style={[styles.title, { color: theme.text }]}>
@@ -357,5 +373,44 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.5,
     shadowRadius: 12,
     elevation: 10,
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 32,
+  },
+  modalBox: {
+    borderRadius: 24,
+    padding: 28,
+    width: '100%',
+    borderWidth: 1,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.4,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    marginBottom: 14,
+    letterSpacing: -0.3,
+  },
+  modalMessage: {
+    fontSize: 16,
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  modalButton: {
+    borderRadius: 14,
+    paddingVertical: 16,
+    alignItems: 'center',
+  },
+  modalButtonText: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    letterSpacing: 0.3,
   },
 });

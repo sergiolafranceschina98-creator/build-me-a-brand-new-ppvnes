@@ -173,18 +173,6 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      <Stack.Screen
-        options={{
-          headerShown: true,
-          title: 'AI Workout Builder',
-          headerStyle: { backgroundColor: theme.backgroundSecondary },
-          headerTintColor: theme.text,
-          headerShadowVisible: false,
-          headerBackVisible: false,
-          headerLeft: () => null,
-        }}
-      />
-
       {/* Error Modal */}
       <Modal
         visible={errorModal.visible}
