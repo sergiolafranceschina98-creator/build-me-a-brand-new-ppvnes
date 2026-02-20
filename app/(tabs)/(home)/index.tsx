@@ -70,10 +70,8 @@ interface Client {
 }
 
 export default function HomeScreen() {
-  console.log('🏠 HomeScreen rendering - DARK THEME ACTIVE');
+  console.log('🏠 HomeScreen rendering - FORCING BLACK THEME');
   
-  // CRITICAL: Force dark theme - no dynamic switching
-  const theme = colors.dark;
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,10 +110,20 @@ export default function HomeScreen() {
     router.push(`/client/${clientId}`);
   };
 
+  const bgColor = colors.dark.background;
+  const cardColor = colors.dark.card;
+  const textColor = colors.dark.text;
+  const textSecondaryColor = colors.dark.textSecondary;
+  const primaryColor = colors.dark.primary;
+  const secondaryColor = colors.dark.secondary;
+  const highlightColor = colors.dark.highlight;
+  const borderColor = colors.dark.border;
+  const errorColor = colors.dark.error;
+
   const loadingView = (
     <View style={styles.centerContainer}>
-      <ActivityIndicator size="large" color={theme.primary} />
-      <Text style={[styles.statusText, { color: theme.textSecondary }]}>
+      <ActivityIndicator size="large" color={primaryColor} />
+      <Text style={[styles.statusText, { color: textSecondaryColor }]}>
         Loading clients...
       </Text>
     </View>
@@ -123,22 +131,22 @@ export default function HomeScreen() {
 
   const errorView = (
     <View style={styles.centerContainer}>
-      <View style={[styles.iconContainer, { backgroundColor: theme.highlight }]}>
+      <View style={[styles.iconContainer, { backgroundColor: highlightColor }]}>
         <IconSymbol
           ios_icon_name="exclamationmark.triangle.fill"
           android_material_icon_name="error"
           size={64}
-          color={theme.error}
+          color={errorColor}
         />
       </View>
-      <Text style={[styles.errorTitle, { color: theme.text }]}>
+      <Text style={[styles.errorTitle, { color: textColor }]}>
         Connection Error
       </Text>
-      <Text style={[styles.errorMessage, { color: theme.textSecondary }]}>
+      <Text style={[styles.errorMessage, { color: textSecondaryColor }]}>
         {error}
       </Text>
       <TouchableOpacity
-        style={[styles.retryButton, { backgroundColor: theme.primary }]}
+        style={[styles.retryButton, { backgroundColor: primaryColor }]}
         onPress={loadClients}
         activeOpacity={0.8}
       >
@@ -155,18 +163,18 @@ export default function HomeScreen() {
 
   const emptyView = (
     <View style={styles.centerContainer}>
-      <View style={[styles.iconContainer, { backgroundColor: theme.highlight }]}>
+      <View style={[styles.iconContainer, { backgroundColor: highlightColor }]}>
         <IconSymbol
           ios_icon_name="person.3.fill"
           android_material_icon_name="group"
           size={64}
-          color={theme.primary}
+          color={primaryColor}
         />
       </View>
-      <Text style={[styles.emptyTitle, { color: theme.text }]}>
+      <Text style={[styles.emptyTitle, { color: textColor }]}>
         No Clients Yet
       </Text>
-      <Text style={[styles.emptySubtitle, { color: theme.textSecondary }]}>
+      <Text style={[styles.emptySubtitle, { color: textSecondaryColor }]}>
         Create your first client to generate AI-powered workout programs
       </Text>
     </View>
@@ -185,13 +193,13 @@ export default function HomeScreen() {
         return (
           <TouchableOpacity
             key={client.id || `client-${index}`}
-            style={[styles.clientCard, { backgroundColor: theme.card, borderColor: theme.border }]}
+            style={[styles.clientCard, { backgroundColor: cardColor, borderColor: borderColor }]}
             onPress={() => handleClientPress(client.id)}
             activeOpacity={0.8}
           >
             <View style={styles.clientHeader}>
               <LinearGradient
-                colors={[theme.primary, theme.secondary]}
+                colors={[primaryColor, secondaryColor]}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 1 }}
                 style={styles.avatar}
@@ -201,30 +209,30 @@ export default function HomeScreen() {
                 </Text>
               </LinearGradient>
               <View style={styles.clientInfo}>
-                <Text style={[styles.clientName, { color: theme.text }]}>
+                <Text style={[styles.clientName, { color: textColor }]}>
                   {client.name}
                 </Text>
-                <Text style={[styles.clientMeta, { color: theme.textSecondary }]}>
+                <Text style={[styles.clientMeta, { color: textSecondaryColor }]}>
                   {client.age} years old
                 </Text>
               </View>
-              <View style={[styles.chevronContainer, { backgroundColor: theme.highlight }]}>
+              <View style={[styles.chevronContainer, { backgroundColor: highlightColor }]}>
                 <IconSymbol
                   ios_icon_name="chevron.right"
                   android_material_icon_name="arrow-forward"
                   size={18}
-                  color={theme.primary}
+                  color={primaryColor}
                 />
               </View>
             </View>
             <View style={styles.clientDetails}>
-              <View style={[styles.badge, { backgroundColor: theme.highlight, borderColor: theme.primary }]}>
-                <Text style={[styles.badgeText, { color: theme.primary }]}>
+              <View style={[styles.badge, { backgroundColor: highlightColor, borderColor: primaryColor }]}>
+                <Text style={[styles.badgeText, { color: primaryColor }]}>
                   {goalText}
                 </Text>
               </View>
-              <View style={[styles.badge, { backgroundColor: theme.highlight, borderColor: theme.primary }]}>
-                <Text style={[styles.badgeText, { color: theme.primary }]}>
+              <View style={[styles.badge, { backgroundColor: highlightColor, borderColor: primaryColor }]}>
+                <Text style={[styles.badgeText, { color: primaryColor }]}>
                   {frequencyText}
                 </Text>
               </View>
@@ -247,14 +255,14 @@ export default function HomeScreen() {
   }
 
   return (
-    <View style={[styles.container, { backgroundColor: theme.background }]}>
+    <View style={[styles.container, { backgroundColor: bgColor }]}>
       <Stack.Screen options={{ headerShown: false }} />
 
       <View style={[styles.header, Platform.OS === 'android' && styles.headerAndroid]}>
-        <Text style={[styles.title, { color: theme.text }]}>
+        <Text style={[styles.title, { color: textColor }]}>
           Your Clients
         </Text>
-        <Text style={[styles.subtitle, { color: theme.textSecondary }]}>
+        <Text style={[styles.subtitle, { color: textSecondaryColor }]}>
           Create personalized workout programs in 60 seconds
         </Text>
       </View>
@@ -267,7 +275,7 @@ export default function HomeScreen() {
         activeOpacity={0.9}
       >
         <LinearGradient
-          colors={[theme.primary, theme.secondary]}
+          colors={[primaryColor, secondaryColor]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
           style={styles.fab}
